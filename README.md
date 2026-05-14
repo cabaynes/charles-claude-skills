@@ -57,6 +57,10 @@ These aren't just "skills I wrote" — each was scored against an 18-rule rubric
 
 Full methodology, per-query verdicts, and revision rationale in [eval-results.md](eval-results.md).
 
+## Maintaining this repo
+
+If you're forking or contributing, see [MAINTAINING.md](MAINTAINING.md) for the release workflow — how to refresh skills from a canonical source, run the eval, bump the CHANGELOG, and verify sanitization before pushing.
+
 ## License
 
 [MIT](LICENSE) — copyright 2026 Charles Baynes. Per-skill `LICENSE` files are also included in each skill folder so the folder is self-contained when copied alone.

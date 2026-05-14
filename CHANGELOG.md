@@ -14,6 +14,7 @@ All notable changes to this project will be documented here. Format roughly foll
   - skill-creator's description-optimization benchmark eval: 20 trigger queries per skill, LLM-as-judge scoring.
   - Results: 100% precision and 100% recall on all four skills. Full report in `eval-results.md`.
 - Resume-builder docs: top-level `README.md`, per-skill `README.md`s, `INSTALL.md`, `CONTRIBUTING.md`, MIT `LICENSE` (root + per-skill).
+- `MAINTAINING.md` — release workflow documentation (how to push edits, add a new skill, run the eval, verify sanitization).
 - `scripts/snapshot.sh` — release helper that copies the canonical local skills into this repo with personal-path sanitization.
 
 ### Notes
