@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+#
+# snapshot.sh — refresh the public repo from local skills with sanitization.
+#
+# Source of truth: ~/.claude/skills/<name>/  (Charles's local, daily-use copies)
+# Target:          this repo's skills/<name>/  (sanitized public snapshot)
+#
+# This script does NOT touch /newproject — that skill has a separate parameterized
+# fork (skills/newproject/SKILL.md) maintained by hand.
+#
+# Run from anywhere; resolves its own location.
+
+set -euo pipefail
+
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+LOCAL_SKILLS="${HOME}/.claude/skills"
+PUBLIC_SKILLS="${REPO_DIR}/skills"
+
+echo "Refreshing public snapshot in ${PUBLIC_SKILLS}/ from ${LOCAL_SKILLS}/"
+
+# --- 1. Copy the session-continuity pair (atomic — both or neither) ---
+echo "  • copying checkpoint + resume into session-continuity/"
+mkdir -p "${PUBLIC_SKILLS}/session-continuity/checkpoint"
+mkdir -p "${PUBLIC_SKILLS}/session-continuity/resume"
+cp "${LOCAL_SKILLS}/checkpoint/SKILL.md" "${PUBLIC_SKILLS}/session-continuity/checkpoint/SKILL.md"
+cp "${LOCAL_SKILLS}/resume/SKILL.md" "${PUBLIC_SKILLS}/session-continuity/resume/SKILL.md"
+
+# --- 2. Copy skill-dict (including references/) ---
+echo "  • copying skill-dict + references/"
+mkdir -p "${PUBLIC_SKILLS}/skill-dict/references"
+cp "${LOCAL_SKILLS}/skill-dict/SKILL.md" "${PUBLIC_SKILLS}/skill-dict/SKILL.md"
+cp "${LOCAL_SKILLS}/skill-dict/references/"*.md "${PUBLIC_SKILLS}/skill-dict/references/"
+
+# --- 3. Apply sanitization to every copied *.md file ---
+# Order matters: do longer/more-specific patterns BEFORE shorter ones.
+echo "  • sanitizing personal paths and names"
+
+SANITIZE_TARGETS=(
+  "${PUBLIC_SKILLS}/session-continuity/checkpoint/SKILL.md"
+  "${PUBLIC_SKILLS}/session-continuity/resume/SKILL.md"
+  "${PUBLIC_SKILLS}/skill-dict/SKILL.md"
+  "${PUBLIC_SKILLS}/skill-dict/references/sync.md"
+  "${PUBLIC_SKILLS}/skill-dict/references/check-updates.md"
+  "${PUBLIC_SKILLS}/skill-dict/references/add.md"
+)
+
+for f in "${SANITIZE_TARGETS[@]}"; do
+  # Memory-dir slug specifics first (longer pattern)
+  sed -i '' 's|-Users-charles-CLAUDE|<project-slug>|g' "$f"
+  # Library root (specific path) before generic CLAUDE root
+  sed -i '' 's|/Users/charles/CLAUDE/skills-library/|~/skills-library/|g' "$f"
+  sed -i '' 's|/Users/charles/CLAUDE/skills-library|~/skills-library|g' "$f"
+  # Charles's workspace root
+  sed -i '' 's|/Users/charles/CLAUDE/|<workspace-root>/|g' "$f"
+  sed -i '' 's|/Users/charles/CLAUDE|<workspace-root>|g' "$f"
+  # .claude home dir
+  sed -i '' 's|/Users/charles/.claude/|~/.claude/|g' "$f"
+  sed -i '' 's|/Users/charles/.claude|~/.claude|g' "$f"
+  # Catch-all home dir
+  sed -i '' 's|/Users/charles/|~/|g' "$f"
+  sed -i '' 's|/Users/charles|~|g' "$f"
+  # Personal name (possessive first, then bare)
+  sed -i '' "s|Charles's|your|g" "$f"
+  sed -i '' 's|Charles |you |g' "$f"
+  sed -i '' 's|Charles$|you|g' "$f"
+  sed -i '' 's|Charles\.|you.|g' "$f"
+  sed -i '' 's|Charles,|you,|g' "$f"
+done
+
+echo ""
+echo "Done. Verify with:"
+echo "  grep -rE '/Users/charles|Charles' ${PUBLIC_SKILLS}/  || echo OK"
