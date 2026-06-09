@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here. Format roughly follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.2.0] — 2026-06-08
+
+### Changed
+
+- **`/checkpoint`**: the post-save "free the context window" reminder is now surface-aware. It detects the running surface via `CLAUDE_CODE_ENTRYPOINT` and gives the correct instruction: in the **terminal CLI** (standalone or VSCode's integrated terminal) `/clear` genuinely frees context, so it now recommends `/clear` → `/resume` instead of closing the window; the window-closing dance is reserved for the **VSCode visual-editor panel** and other GUI surfaces where `/clear` doesn't reliably reset context. Previously the skill told every user to close the window, which was only correct for the visual editor. The MCP-servers-added-this-session exception (full process restart required) is preserved for the CLI path.
+
 ## [0.1.0] — 2026-05-13
 
 ### Added

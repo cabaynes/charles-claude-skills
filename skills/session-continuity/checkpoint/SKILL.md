@@ -25,6 +25,7 @@ Before writing anything, gather context. Run these in parallel:
 - Read the project-level `CLAUDE.md` if one exists in the CWD
 - Read `~/.claude/projects/<project-slug>/memory/MEMORY.md` to know which memory files exist
 - Check the current TodoWrite list state (if you have one in this session — recall from conversation, don't invent)
+- `echo "$CLAUDE_CODE_ENTRYPOINT"` — which surface this is. `cli` = terminal (standalone **or** VSCode's integrated terminal); anything else (or empty) = VSCode's visual-editor chat panel or another GUI surface. This decides the clear-context instructions in Step 5.
 
 Also pull from your conversation memory:
 - What was the user actually trying to accomplish in this session?
@@ -106,8 +107,11 @@ Use this structure exactly — the next agent will be reading it cold:
 
 After saving, print to chat — in this exact order:
 1. The full path to the saved checkpoint file (so they can re-open it later)
-2. **A fresh-window reminder**, since neither `/clear` nor "Clear conversation" actually frees context-window memory, and a fresh agent process is also needed if MCP servers were added this session. Tell the user to **`Cmd+W` to close this Claude Code window, then open a new Claude Code window** in VSCode. (Closing affects only this window — other VSCode windows stay untouched. Note: `Cmd+Shift+P → "Developer: Reload Window"` does NOT actually free the context window — you confirmed this.)
-3. A code block containing exactly `/resume` — what they type in the freshly-reloaded window
+2. **A clear-the-context reminder, matched to the current surface.** Use the `CLAUDE_CODE_ENTRYPOINT` value you read in Step 1 — the right way to free context differs by surface, so don't give the wrong one:
+   - **Terminal CLI** (`CLAUDE_CODE_ENTRYPOINT` is `cli`) — this covers both a standalone terminal and VSCode's *integrated terminal*. Here `/clear` genuinely frees the context window. Tell the user to type `/clear`, then `/resume`. No window juggling needed.
+     - **Exception:** if MCP servers or config were added/changed *this session*, `/clear` won't load them — the process must be restarted. Tell them to fully quit (`Ctrl+C` twice, or `/exit`) and relaunch `claude`, then `/resume`.
+   - **VSCode visual-editor panel, or any other/unknown surface** (`CLAUDE_CODE_ENTRYPOINT` is anything other than `cli`, or empty) — `/clear` does **not** reliably free context here. Tell the user to **`Cmd+W` to close this Claude Code window, then open a new Claude Code window** in VSCode. (Closing affects only this window — other VSCode windows stay untouched. Note: `Cmd+Shift+P → "Developer: Reload Window"` does NOT actually free the context window — you confirmed this.)
+3. A code block containing exactly `/resume` — what they type once the context is cleared (in the CLI, right after `/clear`; in a new/reopened window otherwise)
 4. A one-line confirmation of what memory/CLAUDE.md was updated
 
 Keep your final reply tight — the handoff document does the heavy lifting; don't summarize it again in chat.
