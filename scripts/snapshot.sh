@@ -67,6 +67,33 @@ for f in "${SANITIZE_TARGETS[@]}"; do
   sed -i '' 's|Charles,|you,|g' "$f"
 done
 
+# --- 4. Guard against sanitization residue ---
+# The sed rules above convert "Charles" / "Charles's" → "you" / "your", which only
+# reads correctly when the source uses possessives or second person. A source line
+# written in third-person subject form (e.g. "Charles maintains ... he's installed")
+# sanitizes to broken text ("you maintains ... he's installed"): sed can't fix verb
+# agreement, and bare pronouns (he/his/him/he's) referring to the maintainer aren't
+# caught by the name rules. Those pronouns almost always travel with such drift, so
+# fail loudly on a leaked name or pronoun — drift gets fixed at the source, never
+# shipped silently. (The content has no legitimate third-person pronouns; if a future
+# skill needs one referring to someone else, narrow this check then.)
+echo "  • checking for sanitization residue"
+RESIDUE=0
+for f in "${SANITIZE_TARGETS[@]}"; do
+  if grep -nEi "\bCharles\b|\bhe's\b|\bhis\b|\bhim\b|\bhe\b" "$f"; then
+    echo "    ↑ residue in ${f#${REPO_DIR}/}" >&2
+    RESIDUE=1
+  fi
+done
+if [ "$RESIDUE" -ne 0 ]; then
+  echo "" >&2
+  echo "ERROR: sanitization residue detected (see matches above)." >&2
+  echo "Fix the LOCAL source in ${LOCAL_SKILLS}/ — rewrite third-person subject" >&2
+  echo "references (\"Charles maintains\", \"he's installed\") as possessives" >&2
+  echo "(\"Charles's\") or second person (\"You maintain\"), then re-run." >&2
+  exit 1
+fi
+
 echo ""
 echo "Done. Verify with:"
 echo "  grep -rE '/Users/charles|Charles' ${PUBLIC_SKILLS}/  || echo OK"

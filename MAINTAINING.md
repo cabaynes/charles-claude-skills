@@ -46,7 +46,11 @@ cd ~/CLAUDE/charles-claude-skills && git diff
 
 # 5. Update the version badge in README.md if you bumped a major number
 
-# 6. Verify sanitization (defense in depth — snapshot.sh should have done this)
+# 6. Verify sanitization (defense in depth — snapshot.sh hard-fails on residue:
+#    a leaked "Charles" or a third-person pronoun (he/his/him/he's) left after
+#    sanitizing aborts the snapshot. If it does, fix the LOCAL source — rewrite
+#    third-person subject lines ("Charles maintains ... he's installed") as
+#    possessives ("Charles's") or second person ("You maintain") — then re-run.)
 grep -rnE '/Users/charles|Charles' ~/CLAUDE/charles-claude-skills/skills/
 
 # 7. Commit + push
