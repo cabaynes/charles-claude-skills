@@ -12,8 +12,8 @@ Production-quality slash-command skills for [Claude Code](https://claude.com/cla
 
 | Skill | What it does |
 |---|---|
-| `/checkpoint` | Distills session state into a handoff file before you clear context |
-| `/resume` | Loads the most recent checkpoint in a fresh session |
+| `/putdown` | Distills session state into a handoff file before you clear context |
+| `/pickup` | Loads the most recent checkpoint in a fresh session |
 
 Pair docs: [skills/session-continuity/README.md](skills/session-continuity/README.md)
 
@@ -29,7 +29,7 @@ Pair docs: [skills/session-continuity/README.md](skills/session-continuity/READM
 ```bash
 git clone https://github.com/cabaynes/charles-claude-skills.git
 # Session-continuity pair (one command, both halves):
-cp -r charles-claude-skills/skills/session-continuity/{checkpoint,resume} ~/.claude/skills/
+cp -r charles-claude-skills/skills/session-continuity/{putdown,pickup} ~/.claude/skills/
 # Standalone, opt-in:
 cp -r charles-claude-skills/skills/{newproject,skill-dict} ~/.claude/skills/
 ```
@@ -50,8 +50,8 @@ These aren't just "skills I wrote" — each was scored against an 18-rule rubric
 
 | Skill | Recall | Precision |
 |---|---|---|
-| `/checkpoint` | 10/10 | 10/10 |
-| `/resume` | 10/10 | 10/10 |
+| `/putdown` | 10/10 | 10/10 |
+| `/pickup` | 10/10 | 10/10 |
 | `/newproject` | 10/10 (post-revision) | 10/10 |
 | `/skill-dict` | 10/10 | 10/10 |
 

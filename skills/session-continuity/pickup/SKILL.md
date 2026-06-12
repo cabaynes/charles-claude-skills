@@ -1,6 +1,6 @@
 ---
-name: resume
-description: Use at the start of a fresh Claude Code session when a prior session ended with /checkpoint. Loads the most recent checkpoint for the current project and primes the agent with full context before continuing.
+name: pickup
+description: Use when the user says "pickup" or "resume", or wants to pick up where a prior session left off (the prior session ended with /putdown). Loads the most recent checkpoint file for the current project and primes the agent with full context before continuing.
 argument-hint: "[checkpoint-timestamp]"
 allowed-tools:
   - Read
@@ -10,18 +10,26 @@ allowed-tools:
   - AskUserQuestion
 ---
 
-# /resume — Pick up from a prior checkpoint
+# /pickup — Pick up from a prior checkpoint
 
 The user just started a fresh session and wants to continue from where the previous session ended. There is a checkpoint file waiting for you.
 
+> Renamed 2026-06-12 from `/resume` (paired with `/checkpoint` → `/putdown`) because those names shadow Claude Code built-ins. The handoff FILES are still called checkpoints and still live in the same folders.
+
+## Step 0 — Sync check (CLI↔web handoff)
+
+If the CWD is a git repo with a remote, run `git fetch origin` then `git rev-list --count HEAD..@{u}` before anything else. If origin is **ahead**, work happened on another surface (most likely Claude Code on the web): tell the user and offer to `git pull` before resuming — the newest checkpoint may be inside the pulled `.checkpoints/` folder. If fetch fails (offline, no remote), say so in one line and continue with local checkpoints only.
+
 ## Step 1 — Find the candidate checkpoint(s)
 
-The current project's slug is the basename of the CWD. Checkpoints live at `~/.claude/checkpoints/<project-slug>/`.
+The current project's slug is the basename of the CWD. Checkpoints live in two places: the local `~/.claude/checkpoints/<project-slug>/` dir and the repo's own `.checkpoints/` folder (synced via git so web sessions can read and write them).
 
-List all checkpoints for this project, newest first, and grab the current time so you can label them accurately later:
+List all checkpoints for this project from both locations, newest first, and grab the current time so you can label them accurately later:
 ```
-ls -t ~/.claude/checkpoints/$(basename "$PWD")/*.md 2>/dev/null; date
+ls -t ~/.claude/checkpoints/$(basename "$PWD")/*.md "$PWD"/.checkpoints/*.md 2>/dev/null; date
 ```
+
+If the same `<YYYY-MM-DD-HHMM>.md` filename appears in both locations, treat it as ONE checkpoint and prefer the in-repo copy — it may carry edits pushed from the other surface.
 
 Hold onto the `date` output — you'll subtract from it in Step 1a to produce relative-time labels. The system reminder gives you today's *date* but not the current *clock time*, so without `date` you'll guess and get it wrong (e.g. labeling a 5-minute-old checkpoint as "2h ago").
 

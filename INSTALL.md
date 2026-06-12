@@ -1,24 +1,24 @@
 # Install
 
-Three steps to install any combination of the four skills in this repo. They're all standalone except for the **session-continuity pair** (`/checkpoint` + `/resume`), which must always be installed together.
+Three steps to install any combination of the four skills in this repo. They're all standalone except for the **session-continuity pair** (`/putdown` + `/pickup`), which must always be installed together.
 
 ## Prerequisite
 
 You need Claude Code installed. User-scope skills live at `~/.claude/skills/<name>/SKILL.md` and are auto-discovered on session start.
 
-## 1. Session-continuity pair: `/checkpoint` + `/resume`
+## 1. Session-continuity pair: `/putdown` + `/pickup`
 
-These are a matched pair — `/resume` reads the handoff files that `/checkpoint` writes. Installing one without the other gets you half a feature.
+These are a matched pair — `/pickup` reads the handoff files that `/putdown` writes. Installing one without the other gets you half a feature.
 
 ```bash
 git clone https://github.com/cabaynes/charles-claude-skills.git
-cp -r charles-claude-skills/skills/session-continuity/{checkpoint,resume} ~/.claude/skills/
+cp -r charles-claude-skills/skills/session-continuity/{putdown,pickup} ~/.claude/skills/
 ```
 
 That copies **both** skill folders into `~/.claude/skills/` in one command. Verify:
 
 ```bash
-ls ~/.claude/skills/checkpoint/SKILL.md ~/.claude/skills/resume/SKILL.md
+ls ~/.claude/skills/putdown/SKILL.md ~/.claude/skills/pickup/SKILL.md
 ```
 
 No environment-variable setup required.
@@ -61,8 +61,8 @@ The instructions above use `cp -r` (copy). The alternative is `ln -s` (symlink) 
 **Symlink:**
 ```bash
 # Example for the session-continuity pair:
-ln -s "$(pwd)/charles-claude-skills/skills/session-continuity/checkpoint" ~/.claude/skills/checkpoint
-ln -s "$(pwd)/charles-claude-skills/skills/session-continuity/resume" ~/.claude/skills/resume
+ln -s "$(pwd)/charles-claude-skills/skills/session-continuity/putdown" ~/.claude/skills/putdown
+ln -s "$(pwd)/charles-claude-skills/skills/session-continuity/pickup" ~/.claude/skills/pickup
 ```
 - ✓ `git pull` updates your installed skills
 - ✗ Deleting the repo breaks your installed skills
@@ -85,11 +85,11 @@ Newly installed skills are discovered when Claude Code starts a new session. In 
 **Permission prompts every time I invoke a skill:**
 Each skill ships with an `allowed-tools` frontmatter field that pre-authorizes the tools it needs. If you're still getting prompts, your Claude Code settings may be overriding this. Check `~/.claude/settings.json` and `~/.claude/settings.local.json` for permission entries that conflict.
 
-**`/checkpoint` says "no project slug, multi-project parent":**
-Pass the slug as an argument: `/checkpoint <name>`. This happens when your CWD is a parent folder containing multiple projects (e.g. you're in `~/projects/` rather than `~/projects/foo/`).
+**`/putdown` says "no project slug, multi-project parent":**
+Pass the slug as an argument: `/putdown <name>`. This happens when your CWD is a parent folder containing multiple projects (e.g. you're in `~/projects/` rather than `~/projects/foo/`).
 
-**`/resume` can't find a checkpoint:**
-Make sure the checkpoint files exist at `~/.claude/checkpoints/<project-slug>/`. If you're in a different CWD than when you ran `/checkpoint`, the project slug won't match — see the `/resume` skill's "no checkpoint found" branch, which lists all available project slugs.
+**`/pickup` can't find a checkpoint:**
+Make sure the checkpoint files exist at `~/.claude/checkpoints/<project-slug>/`. If you're in a different CWD than when you ran `/putdown`, the project slug won't match — see the `/pickup` skill's "no checkpoint found" branch, which lists all available project slugs.
 
 **`/newproject` keeps asking about `WORKSPACE_DIR`:**
 Export it in your shell rc so it persists across sessions (see step 2 above).
@@ -97,7 +97,7 @@ Export it in your shell rc so it persists across sessions (see step 2 above).
 ## Uninstall
 
 ```bash
-rm -rf ~/.claude/skills/{checkpoint,resume,newproject,skill-dict}
+rm -rf ~/.claude/skills/{putdown,pickup,newproject,skill-dict}
 ```
 
 Restart Claude Code in a fresh window.

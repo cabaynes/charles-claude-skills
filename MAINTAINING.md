@@ -13,8 +13,8 @@ The release workflow. If you edited a local skill and want the change to show up
 
 | Repo path | Canonical source | Refreshed by |
 |---|---|---|
-| `skills/session-continuity/checkpoint/SKILL.md` | `~/.claude/skills/checkpoint/SKILL.md` | `snapshot.sh` |
-| `skills/session-continuity/resume/SKILL.md` | `~/.claude/skills/resume/SKILL.md` | `snapshot.sh` |
+| `skills/session-continuity/putdown/SKILL.md` | `~/.claude/skills/putdown/SKILL.md` | `snapshot.sh` |
+| `skills/session-continuity/pickup/SKILL.md` | `~/.claude/skills/pickup/SKILL.md` | `snapshot.sh` |
 | `skills/skill-dict/SKILL.md` | `~/.claude/skills/skill-dict/SKILL.md` | `snapshot.sh` |
 | `skills/skill-dict/references/*.md` | `~/.claude/skills/skill-dict/references/*.md` | `snapshot.sh` |
 | `skills/newproject/SKILL.md` | **this file is canonical here** (parameterized fork) | Edit directly |
@@ -25,7 +25,7 @@ The release workflow. If you edited a local skill and want the change to show up
 
 ## Releasing an edit to an existing skill
 
-You changed `~/.claude/skills/checkpoint/SKILL.md` (or `resume`, or `skill-dict`). To ship that change:
+You changed `~/.claude/skills/putdown/SKILL.md` (or `pickup`, or `skill-dict`). To ship that change:
 
 ```bash
 # 1. Refresh the repo snapshot (copy + sanitize)
@@ -42,7 +42,7 @@ cd ~/CLAUDE/charles-claude-skills && git diff
 #    Example:
 #    ## [0.2.0] — YYYY-MM-DD
 #    ### Changed
-#    - /checkpoint: <one-line summary of the change and why>
+#    - /putdown: <one-line summary of the change and why>
 
 # 5. Update the version badge in README.md if you bumped a major number
 
@@ -131,7 +131,7 @@ You can spawn 4 parallel sub-agents (one per skill, one query batch each) to mak
 
 - **Snapshot pattern** = local-as-source, repo-as-snapshot. Lets you edit one place (your daily-use copies) and ship without manual copy-pasting. Sanitization runs as part of the snapshot so you can't accidentally publish `/Users/charles/...` paths.
 - **`/newproject` divergence** = the local version assumes Charles's `~/CLAUDE/` workspace + fan-out memory script; the public version reads `$WORKSPACE_DIR` and works without the helper. Maintaining both isn't free, but the alternatives are worse: either ship a Charles-specific skill nobody else can use, or make Charles's local workflow more complex.
-- **Bundling `/checkpoint` + `/resume` in `session-continuity/`** = they only work as a pair. Structural enforcement prevents anyone (including future-you) from installing half of the feature.
+- **Bundling `/putdown` + `/pickup` in `session-continuity/`** = they only work as a pair. Structural enforcement prevents anyone (including future-you) from installing half of the feature.
 - **Eval gate on description changes** = trigger accuracy is the one quality metric that's easy to regress and hard to notice. Running the eval before pushing catches that automatically.
 
 ## Quick reference: the most common commands

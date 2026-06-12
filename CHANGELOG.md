@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented here. Format roughly follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.3.0] — 2026-06-12
+
+### Changed (breaking: skill names)
+
+- **Session-continuity pair renamed: `/checkpoint` → `/putdown` and `/resume` → `/pickup`.** The old names collide with Claude Code **built-in** commands for every user: `/resume` is the built-in conversation-resume picker, and `/checkpoint` is a built-in alias for `/rewind`. Custom skills currently shadow those built-ins (locking you out of them), and updates to Claude Code can silently flip that precedence ([anthropics/claude-code#33080](https://github.com/anthropics/claude-code/issues/33080)). The handoff FILES are unchanged — still timestamped markdown in `~/.claude/checkpoints/<project>/` — so existing checkpoints keep working after the rename. To migrate an existing install: `mv ~/.claude/skills/checkpoint ~/.claude/skills/putdown && mv ~/.claude/skills/resume ~/.claude/skills/pickup` then re-copy the SKILL.md files from this release.
+- **`/putdown` now ends the session cleanly: it commits and pushes all session work.** After writing the handoff file it reviews the changed-file list (with a secrets gate — `.env*`, keys, and credential files are never staged), commits everything with a descriptive message, and pushes if a remote exists, reporting the pushed SHA or a prominent warning on failure. In private repos it also copies the handoff into the repo's `.checkpoints/` folder so cloud sessions (Claude Code on the web) can read it; public and Pages-served repos skip the in-repo copy so session notes are never published.
+- **`/pickup` is now cross-surface aware.** It starts with `git fetch` and flags when origin is ahead (work pushed from another surface, e.g. Claude Code on the web), and searches both `~/.claude/checkpoints/<project>/` and the repo's `.checkpoints/`, deduplicating by timestamp.
+
 ## [0.2.0] — 2026-06-08
 
 ### Changed

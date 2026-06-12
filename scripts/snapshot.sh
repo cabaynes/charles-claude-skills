@@ -19,11 +19,11 @@ PUBLIC_SKILLS="${REPO_DIR}/skills"
 echo "Refreshing public snapshot in ${PUBLIC_SKILLS}/ from ${LOCAL_SKILLS}/"
 
 # --- 1. Copy the session-continuity pair (atomic — both or neither) ---
-echo "  • copying checkpoint + resume into session-continuity/"
-mkdir -p "${PUBLIC_SKILLS}/session-continuity/checkpoint"
-mkdir -p "${PUBLIC_SKILLS}/session-continuity/resume"
-cp "${LOCAL_SKILLS}/checkpoint/SKILL.md" "${PUBLIC_SKILLS}/session-continuity/checkpoint/SKILL.md"
-cp "${LOCAL_SKILLS}/resume/SKILL.md" "${PUBLIC_SKILLS}/session-continuity/resume/SKILL.md"
+echo "  • copying putdown + pickup into session-continuity/"
+mkdir -p "${PUBLIC_SKILLS}/session-continuity/putdown"
+mkdir -p "${PUBLIC_SKILLS}/session-continuity/pickup"
+cp "${LOCAL_SKILLS}/putdown/SKILL.md" "${PUBLIC_SKILLS}/session-continuity/putdown/SKILL.md"
+cp "${LOCAL_SKILLS}/pickup/SKILL.md" "${PUBLIC_SKILLS}/session-continuity/pickup/SKILL.md"
 
 # --- 2. Copy skill-dict (including references/) ---
 echo "  • copying skill-dict + references/"
@@ -36,8 +36,8 @@ cp "${LOCAL_SKILLS}/skill-dict/references/"*.md "${PUBLIC_SKILLS}/skill-dict/ref
 echo "  • sanitizing personal paths and names"
 
 SANITIZE_TARGETS=(
-  "${PUBLIC_SKILLS}/session-continuity/checkpoint/SKILL.md"
-  "${PUBLIC_SKILLS}/session-continuity/resume/SKILL.md"
+  "${PUBLIC_SKILLS}/session-continuity/putdown/SKILL.md"
+  "${PUBLIC_SKILLS}/session-continuity/pickup/SKILL.md"
   "${PUBLIC_SKILLS}/skill-dict/SKILL.md"
   "${PUBLIC_SKILLS}/skill-dict/references/sync.md"
   "${PUBLIC_SKILLS}/skill-dict/references/check-updates.md"

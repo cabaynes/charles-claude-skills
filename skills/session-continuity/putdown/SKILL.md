@@ -1,6 +1,6 @@
 ---
-name: checkpoint
-description: Use when the context window is filling up (around 50% used) or before stepping away from a long session. Creates a handoff file that a fresh Claude Code session reads to resume without losing momentum.
+name: putdown
+description: Use when the user says "putdown" or "checkpoint", when ending or stepping away from a working session, or when the context window is filling up (around 50% used). Creates a handoff file that a fresh Claude Code session reads (via /pickup) to resume without losing momentum, then commits and pushes all session work — a putdown means the session is ending, nothing stays unpushed.
 argument-hint: "[project-slug]"
 allowed-tools:
   - Read
@@ -11,9 +11,11 @@ allowed-tools:
   - Glob
 ---
 
-# /checkpoint — Context handoff before clearing
+# /putdown — Context handoff before clearing
 
 The user is about to clear the context window and start fresh. Your job: capture **everything a new agent would need** so the next session loses no momentum.
+
+> Renamed 2026-06-12 from `/checkpoint` (paired with `/resume` → `/pickup`) because those names shadow Claude Code built-ins (`/checkpoint` is an alias for `/rewind`; `/resume` opens the conversation picker). The handoff FILES are still called checkpoints and still live in the same folders — nothing about storage changed.
 
 ## Step 1 — Read current state (parallel)
 
@@ -56,7 +58,7 @@ If there's a `CLAUDE.md` in the current project directory:
 Save to `~/.claude/checkpoints/<project-slug>/<YYYY-MM-DD-HHMM>.md`. Create the per-project subfolder if it doesn't exist (`mkdir -p`).
 
 **Determining `<project-slug>`:**
-- If the user passed an argument (e.g. `/checkpoint jessica`), use that as the slug. This is the right choice when the CWD is a parent folder containing multiple projects (e.g. CWD is `CLAUDE` but the work is about jessica).
+- If the user passed an argument (e.g. `/putdown jessica`), use that as the slug. This is the right choice when the CWD is a parent folder containing multiple projects (e.g. CWD is `CLAUDE` but the work is about jessica).
 - Otherwise, use the basename of the CWD (e.g. `jessica`, `BookmarkSync`).
 - If the CWD basename looks like a multi-project parent (e.g. `CLAUDE`) and no argument was given, **ask the user** which project this checkpoint is for before saving — don't dump it under the parent folder name.
 
@@ -96,23 +98,34 @@ Use this structure exactly — the next agent will be reading it cold:
 ## Environment state
 - Dev servers running: <list or "none">
 - Background processes: <list or "none">
-- Modified-but-uncommitted files: <list>
+- Modified-but-uncommitted files: <list — should be "none" after Step 4.5 commits>
+- Pushed to origin: <branch @ short SHA — filled in by Step 4.5; or "no remote" / "PUSH FAILED: <why>">
 - Anything the user needs to manually do before resuming: <list or "none">
 
 ## First message to paste in the new session
-> <Literal text the user should send. Easiest: just have them type `/resume` — the resume skill will pick up this latest checkpoint automatically. Only write a custom message if there's something the next agent needs to know that isn't captured in the sections above.>
+> <Literal text the user should send. Easiest: just have them type `/pickup` — the pickup skill will load this latest checkpoint automatically. Only write a custom message if there's something the next agent needs to know that isn't captured in the sections above.>
 ```
+
+## Step 4.5 — Commit + push (a checkpoint means the session is ending)
+
+Skip this step entirely if the CWD is not a git repo.
+
+1. **In-repo checkpoint copy — private repos only.** If the repo is **private** AND its contents are not publicly served (a GitHub Pages site publishes everything on its deployed branch), copy the just-written handoff file to `<repo>/.checkpoints/<same-YYYY-MM-DD-HHMM>.md` (`mkdir -p .checkpoints`). This is what makes the checkpoint readable from Claude Code on the web. For **public repos** and Pages-served repos, skip the copy — committed checkpoints there would be published; the local file in `~/.claude/checkpoints/` is the only copy. Check visibility with `gh repo view --json visibility` or the project CLAUDE.md; if still unsure, skip the copy and say so.
+2. **Secrets gate before staging.** Run `git status --porcelain` and review the file list. Never stage `.env*` (except `.env.example`), `secrets*`, `*.pem`, `*.key`, or credential files — they should already be gitignored; if one shows up untracked, add it to `.gitignore` instead of committing it. Never use `git add -f`.
+3. **Commit everything** with a descriptive message summarizing the session's work (not "checkpoint" — say what changed). Include the in-repo checkpoint copy from substep 1.
+4. **Push** the current branch if a remote exists (`git push`, or `git push -u origin <branch>` for a new branch). Then update the handoff file's "Pushed to origin" line with `<branch> @ <short SHA>` — and refresh the in-repo copy if it is now stale. If there is **no remote** or the **push fails**, write that prominently in the handoff file and tell the user in Step 5 — never fail silently; unpushed work is invisible to web sessions.
 
 ## Step 5 — Show it to the user
 
 After saving, print to chat — in this exact order:
 1. The full path to the saved checkpoint file (so they can re-open it later)
 2. **A clear-the-context reminder, matched to the current surface.** Use the `CLAUDE_CODE_ENTRYPOINT` value you read in Step 1 — the right way to free context differs by surface, so don't give the wrong one:
-   - **Terminal CLI** (`CLAUDE_CODE_ENTRYPOINT` is `cli`) — this covers both a standalone terminal and VSCode's *integrated terminal*. Here `/clear` genuinely frees the context window. Tell the user to type `/clear`, then `/resume`. No window juggling needed.
-     - **Exception:** if MCP servers or config were added/changed *this session*, `/clear` won't load them — the process must be restarted. Tell them to fully quit (`Ctrl+C` twice, or `/exit`) and relaunch `claude`, then `/resume`.
+   - **Terminal CLI** (`CLAUDE_CODE_ENTRYPOINT` is `cli`) — this covers both a standalone terminal and VSCode's *integrated terminal*. Here `/clear` genuinely frees the context window. Tell the user to type `/clear`, then `/pickup`. No window juggling needed.
+     - **Exception:** if MCP servers or config were added/changed *this session*, `/clear` won't load them — the process must be restarted. Tell them to fully quit (`Ctrl+C` twice, or `/exit`) and relaunch `claude`, then `/pickup`.
    - **VSCode visual-editor panel, or any other/unknown surface** (`CLAUDE_CODE_ENTRYPOINT` is anything other than `cli`, or empty) — `/clear` does **not** reliably free context here. Tell the user to **`Cmd+W` to close this Claude Code window, then open a new Claude Code window** in VSCode. (Closing affects only this window — other VSCode windows stay untouched. Note: `Cmd+Shift+P → "Developer: Reload Window"` does NOT actually free the context window — you confirmed this.)
-3. A code block containing exactly `/resume` — what they type once the context is cleared (in the CLI, right after `/clear`; in a new/reopened window otherwise)
+3. A code block containing exactly `/pickup` — what they type once the context is cleared (in the CLI, right after `/clear`; in a new/reopened window otherwise)
 4. A one-line confirmation of what memory/CLAUDE.md was updated
+5. The commit + push result: `<branch> @ <short SHA> pushed to <repo>` — or a **prominent warning** if there was no remote or the push failed (that work is invisible to Claude Code on the web until pushed)
 
 Keep your final reply tight — the handoff document does the heavy lifting; don't summarize it again in chat.
 

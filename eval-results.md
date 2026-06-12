@@ -1,5 +1,7 @@
 # Skill evaluation report — 2026-05-13
 
+> **Note (2026-06-12):** the session-continuity pair has since been renamed `/checkpoint` → `/putdown` and `/resume` → `/pickup` (the old names shadow Claude Code built-ins — see CHANGELOG 0.3.0). This report is preserved as-is under the names the skills had when evaluated; the trigger descriptions have changed since, so scores below predate the rename.
+
 Evaluation of `/checkpoint`, `/resume`, `/newproject`, `/skill-dict` against current Anthropic + community best-practices, plus a trigger-accuracy benchmark eval (skill-creator methodology).
 
 ## Headline
