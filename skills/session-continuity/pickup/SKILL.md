@@ -35,7 +35,7 @@ Hold onto the `date` output — you'll subtract from it in Step 1a to produce re
 
 Branch on the count:
 
-- **0 files** — no checkpoint matched. Check `~/.claude/checkpoints/` to list all available project subfolders, in case the user is in a different CWD than when they checkpointed (e.g. they checkpointed from `<workspace-root>/jessica` but ran `/resume` from `<workspace-root>/jessica/pipeline`). Tell the user no checkpoint was found for this project, list what *is* available, and ask which to load (or to start fresh).
+- **0 files** — no checkpoint matched. Check `~/.claude/checkpoints/` to list all available project subfolders, in case the user is in a different CWD than when they checkpointed (e.g. they checkpointed from `<workspace-root>/jessica` but ran `/pickup` from `<workspace-root>/jessica/pipeline`). Tell the user no checkpoint was found for this project, list what *is* available, and ask which to load (or to start fresh).
 - **1 file** — load it directly. Skip Step 1a and proceed to Step 2 with that file.
 - **2+ files** — go to Step 1a to let the user pick. (The user sometimes runs parallel VS Code conversations rooted in the same project folder, so the most recent file is not always the one they want.)
 

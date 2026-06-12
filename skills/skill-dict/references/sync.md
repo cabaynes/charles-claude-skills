@@ -21,7 +21,7 @@ Filter out anything that is itself the name of a plugin from step 1 OR a known p
 - If it's listed in `installed_plugins.json` → plugin (already covered).
 - If it has a `gsd-` prefix → child of `gsd`, skip.
 - Otherwise → likely authored. Confirm by checking the SKILL.md frontmatter — if it has a recognizable plugin marker, skip; otherwise treat as authored.
-- Default authored set: `checkpoint`, `resume`, `newproject`, plus the `gsd` parent name itself (since GSD installs to `~/.claude/skills/` not via plugin manifest).
+- Default authored set: `putdown`, `pickup`, `newproject`, plus the `gsd` parent name itself (since GSD installs to `~/.claude/skills/` not via plugin manifest).
 
 ## 3. List existing library files
 
@@ -50,7 +50,7 @@ Use the template from `README.md`. Pre-fill what's known:
 - `activation:` — classify by inspecting the skill:
   - `always-on` if the plugin installs a `SessionStart` or always-firing hook in `~/.claude/settings.json`, OR if it's a meta-skill loaded as a system-prompt directive.
   - `auto-on-match` if the SKILL.md frontmatter description starts with "Use when..." or describes content-based triggers (the agent will auto-invoke).
-  - `manual` if the description is a slash-command-style verb ("Create...", "Show...", "Run...") with no auto-trigger language, or if it's clearly user-driven (`/checkpoint`, `/resume`, `/<plugin>:<skill>` with no auto-trigger).
+  - `manual` if the description is a slash-command-style verb ("Create...", "Show...", "Run...") with no auto-trigger language, or if it's clearly user-driven (`/putdown`, `/pickup`, `/<plugin>:<skill>` with no auto-trigger).
   - Combine with `+` if multiple modes apply (e.g. `always-on (hook) + manual (sub-skills)`).
 - "What it is" — write a 2-3 sentence description by reading the skill's own SKILL.md frontmatter `description:` field. Do NOT just copy the description verbatim — distill it.
 - "How to trigger it" — fill in:
