@@ -1,6 +1,6 @@
 ---
 name: pickup
-description: Use when the user says "pickup" or "resume", or wants to pick up where a prior session left off (the prior session ended with /putdown). Loads the most recent checkpoint file for the current project and primes the agent with full context before continuing.
+description: Use when the user says "pickup", or wants to resume/pick up their work from a prior session that ended with /putdown — loads the most recent checkpoint file for the current project and primes the agent with full context before continuing. Do NOT use for reopening a previous Claude conversation (that is the built-in /resume picker) or for resuming media, downloads, paused processes, or VMs.
 argument-hint: "[checkpoint-timestamp]"
 allowed-tools:
   - Read
