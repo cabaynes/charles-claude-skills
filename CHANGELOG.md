@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here. Format roughly follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.4.0] — 2026-06-13
+
+### Changed (breaking: storage path)
+
+- **Handoff files moved from `.checkpoints/` → `.putdowns/` and the word "checkpoint" is retired.** The 0.3.0 rename freed the command names but left the files still called "checkpoints," which kept the old term in play and risked the same confusion with the built-in `/checkpoint`/`/rewind` feature. The handoff files a session produces are now called **putdowns**, stored in `~/.claude/putdowns/<project>/` locally and `.putdowns/` inside a repo. The file format is unchanged. To migrate an existing install: `mv ~/.claude/checkpoints ~/.claude/putdowns` (local store), and in any repo that has committed handoffs, `git mv .checkpoints .putdowns`. The skills still read a stray `.checkpoints/` folder if they encounter one, so nothing breaks if you migrate gradually.
+
 ## [0.3.0] — 2026-06-12
 
 ### Changed (breaking: skill names)

@@ -13,7 +13,7 @@ Production-quality slash-command skills for [Claude Code](https://claude.com/cla
 | Skill | What it does |
 |---|---|
 | `/putdown` | Distills session state into a handoff file before you clear context |
-| `/pickup` | Loads the most recent checkpoint in a fresh session |
+| `/pickup` | Loads the most recent putdown in a fresh session |
 
 Pair docs: [skills/session-continuity/README.md](skills/session-continuity/README.md)
 

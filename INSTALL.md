@@ -88,8 +88,8 @@ Each skill ships with an `allowed-tools` frontmatter field that pre-authorizes t
 **`/putdown` says "no project slug, multi-project parent":**
 Pass the slug as an argument: `/putdown <name>`. This happens when your CWD is a parent folder containing multiple projects (e.g. you're in `~/projects/` rather than `~/projects/foo/`).
 
-**`/pickup` can't find a checkpoint:**
-Make sure the checkpoint files exist at `~/.claude/checkpoints/<project-slug>/`. If you're in a different CWD than when you ran `/putdown`, the project slug won't match — see the `/pickup` skill's "no checkpoint found" branch, which lists all available project slugs.
+**`/pickup` can't find a putdown:**
+Make sure the putdown files exist at `~/.claude/putdowns/<project-slug>/`. If you're in a different CWD than when you ran `/putdown`, the project slug won't match — see the `/pickup` skill's "no putdown found" branch, which lists all available project slugs.
 
 **`/newproject` keeps asking about `WORKSPACE_DIR`:**
 Export it in your shell rc so it persists across sessions (see step 2 above).

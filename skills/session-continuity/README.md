@@ -19,7 +19,7 @@ Claude Code's context window is finite. As a session grows, you hit limits. Thre
 2. **Auto-compaction.** Lossy and unstructured. Compresses recent history but doesn't differentiate "this was a dead end, don't redo" from "this is the next step."
 3. **"Reload Window" in VSCode.** This doesn't actually free Claude Code's context-window memory. It feels like it should, but it doesn't. Only closing the Claude Code window with `Cmd+W` and opening a new one starts a fresh agent process.
 
-`/putdown` solves all three by writing a structured markdown file with sections specifically designed for re-entering work: **Where we are right now**, **What's in progress (resume here)**, **Immediate next steps**, **Blockers**, **Key decisions made & why**, and **What NOT to redo**. The file lives at `~/.claude/checkpoints/<project-slug>/<timestamp>.md`.
+`/putdown` solves all three by writing a structured markdown file with sections specifically designed for re-entering work: **Where we are right now**, **What's in progress (resume here)**, **Immediate next steps**, **Blockers**, **Key decisions made & why**, and **What NOT to redo**. The file lives at `~/.claude/putdowns/<project-slug>/<timestamp>.md`.
 
 `/pickup` then loads it in a fresh session and confirms with you before picking up the work.
 
@@ -39,9 +39,9 @@ The workflow is four steps:
 1. **In the current session** (when you're at ~50% context usage or stepping away): type `/putdown`.
 2. **Close the Claude Code window** with `Cmd+W`. (Do not use "Reload Window" — it doesn't actually free the context window.)
 3. **Open a fresh Claude Code window.**
-4. **Type `/pickup`.** It finds your most recent checkpoint, summarizes it, and asks you to confirm before continuing.
+4. **Type `/pickup`.** It finds your most recent putdown, summarizes it, and asks you to confirm before continuing.
 
-If you have multiple parallel sessions in the same project (e.g. two VSCode windows in the same folder), `/pickup` shows a picker with the 4 most recent checkpoints so you can grab the right one.
+If you have multiple parallel sessions in the same project (e.g. two VSCode windows in the same folder), `/pickup` shows a picker with the 4 most recent putdowns so you can grab the right one.
 
 ## Best practices
 

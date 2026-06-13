@@ -13,7 +13,7 @@ PRs are welcome. These skills were authored for a specific personal workflow but
 ## What's unlikely to be merged
 
 - New skills (this repo is curated; consider your own fork)
-- Major restructuring of `/checkpoint` + `/resume` (the pair has been eval-validated; changes need eval evidence)
+- Major restructuring of `/putdown` + `/pickup` (the pair has been eval-validated; changes need eval evidence)
 - Stripping the `~/CLAUDE/` references from comments where they're explaining the original use case
 
 ## Before opening a PR
@@ -37,7 +37,7 @@ PRs are welcome. These skills were authored for a specific personal workflow but
 ## Reporting bugs
 
 Open an issue with:
-- Which skill (`/checkpoint`, `/resume`, `/newproject`, `/skill-dict`)
+- Which skill (`/putdown`, `/pickup`, `/newproject`, `/skill-dict`)
 - Claude Code version (`/version` in Claude Code)
 - macOS / Linux / WSL
 - A minimal reproduction (the exact query you typed, what you expected, what happened)
