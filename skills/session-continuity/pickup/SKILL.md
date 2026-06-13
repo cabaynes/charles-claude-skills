@@ -1,6 +1,6 @@
 ---
 name: pickup
-description: Use when the user says "pickup", or wants to resume/pick up their work from a prior session that ended with /putdown — loads the most recent putdown file (the handoff note) for the current project and primes the agent with full context before continuing. Do NOT use for reopening a previous Claude conversation (that is the built-in /resume picker) or for resuming media, downloads, paused processes, or VMs.
+description: Use when the user says "pickup", asks "where were we" after opening a fresh window, or wants to resume/pick up their work from a prior session that ended with /putdown — loads the most recent putdown file (the handoff note) for the current project and primes the agent with full context before continuing. Do NOT use for reopening a previous Claude conversation (that is the built-in /resume picker) or for resuming media, downloads, paused processes, or VMs.
 argument-hint: "[putdown-timestamp]"
 allowed-tools:
   - Read

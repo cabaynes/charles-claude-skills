@@ -1,15 +1,16 @@
-# Skill evaluation report — 2026-05-13
+# Skill evaluation report
 
-> **Note (2026-06-12):** the session-continuity pair has since been renamed `/checkpoint` → `/putdown` and `/resume` → `/pickup` (the old names shadow Claude Code built-ins — see CHANGELOG 0.3.0). This report is preserved as-is under the names the skills had when evaluated; the trigger descriptions have changed since, so scores below predate the rename.
+**Skills evaluated:** `/putdown`, `/pickup`, `/newproject`, `/skill-dict`
+**Original eval:** 2026-05-13 · **Session-continuity pair re-evaluated:** 2026-06-13
 
-Evaluation of `/checkpoint`, `/resume`, `/newproject`, `/skill-dict` against current Anthropic + community best-practices, plus a trigger-accuracy benchmark eval (skill-creator methodology).
+> The session-continuity pair was first evaluated on 2026-05-13 under the names `/checkpoint` and `/resume`, scoring 100%/100% each. Those names were later retired because they shadow Claude Code built-ins (`/checkpoint` aliases `/rewind`; `/resume` opens the conversation picker — see CHANGELOG 0.3.0/0.4.0). The pair is now `/putdown` + `/pickup`, the descriptions changed during the rename, and the handoff files moved to `.putdowns/`. The scores below for those two reflect a **fresh re-eval on 2026-06-13** against the current descriptions; `/newproject` and `/skill-dict` are unchanged from the 2026-05-13 run.
 
 ## Headline
 
-| Skill | Recall | Precision | Verdict | Pre-edit gaps fixed |
+| Skill | Recall | Precision | Verdict | Notes |
 |---|---|---|---|---|
-| `/checkpoint` | 10/10 (100%) | 10/10 (100%) | ✅ PASS | Description rewritten "Use when…"; added `argument-hint` + `allowed-tools` |
-| `/resume` | 10/10 (100%) | 10/10 (100%) | ✅ PASS | Description rewritten "Use when…"; added `argument-hint` + `allowed-tools` |
+| `/putdown` | 10/10 (100%) | 10/10 (100%) | ✅ PASS | Re-evaluated 2026-06-13 under current name + description |
+| `/pickup` | 10/10 (100%) | 10/10 (100%) | ✅ PASS | Re-evaluated 2026-06-13; one revision to recover a fresh-window phrasing (below) |
 | `/newproject` | 9/10 (90%) → 10/10 expected | 10/10 (100%) | ✅ PASS (revised) | Description rewritten with explicit "do NOT" guards; added `argument-hint` + `allowed-tools` |
 | `/skill-dict` | 10/10 (100%) | 10/10 (100%) | ✅ PASS | Description tightened; subcommand bodies extracted to `references/`; body reduced from ~1500 → 440 words |
 
@@ -31,71 +32,52 @@ The 18 rules cover: frontmatter required fields, description quality (trigger-fi
 
 ### Stage 2 — Benchmark trigger-accuracy eval
 
-skill-creator's description-optimization methodology, run autonomously by sub-agents:
+skill-creator's description-optimization methodology. Each query is run as a real trigger test — a fresh `claude -p` session is given only the skill's description (as an available command) plus the user query, and the harness records whether the session's first action invokes the skill.
 
 1. **20 trigger queries per skill** — 10 should-trigger (realistic user phrasings) + 10 should-not-trigger (near-miss adversarial — phrasings that look related but shouldn't fire).
-2. **LLM-as-judge** — a fresh agent reads only the skill description and each query in turn, decides "would Claude with this skill loaded invoke it?", and records a verdict.
+2. **3 runs per query**, majority vote, to smooth out non-determinism.
 3. **Score**:
    - **Recall** = correct should-trigger / 10 (does the skill fire when it should?)
    - **Precision** = correct should-not-trigger / 10 (does the skill abstain when it shouldn't fire?)
 4. **Threshold** — ≥80% on both metrics. Real bar: 100% (no regression). One iteration of description revision allowed if a skill falls short.
 
+> **Harness note (learned the hard way):** run probes **serially** (one at a time) and **move the real skill out of the skills dir** during the eval. Parallel probes let the temp skill-copies shadow each other (false misses), and an installed copy of the skill being tested wins the trigger race over the temp copy (also false misses). And if the eval model is unavailable, every query returns a uniform 0/3 with no tool calls — that's an environment failure, not a regression.
+
 ---
 
-## Pre-edit static-review findings
+## Session-continuity pair — current descriptions (2026-06-13)
 
-| Skill | Issues |
-|---|---|
-| `/checkpoint` | Description led with verb ("Create…"), not "Use when…"; included workflow summary (rule #5 anti-pattern); missing `argument-hint`; missing `allowed-tools` |
-| `/resume` | Same pattern: verb-led description with workflow summary; missing both frontmatter fields |
-| `/newproject` | Same; plus description was 520 chars (over 500-char target) |
-| `/skill-dict` | Body length ~1500 words (over <500-word guideline); description acceptable, frontmatter already complete |
+### `/putdown`
+`Use when the user says "putdown", when ending or stepping away from a working session, or when the context window is filling up (around 50% used). Creates a handoff file that a fresh Claude Code session reads (via /pickup) to resume without losing momentum, then commits and pushes all session work — a putdown means the session is ending, nothing stays unpushed.`
+- **Frontmatter** → `argument-hint: "[project-slug]"` + `allowed-tools: [Read, Write, Edit, Bash, Grep, Glob]`
 
-## Edits applied
-
-### `/checkpoint`
-- **Description** → `Use when the context window is filling up (around 50% used) or before stepping away from a long session. Creates a handoff file that a fresh Claude Code session reads to resume without losing momentum.`
-- **Frontmatter** → added `argument-hint: "[project-slug]"` + `allowed-tools: [Read, Write, Edit, Bash, Grep, Glob]`
-
-### `/resume`
-- **Description** → `Use at the start of a fresh Claude Code session when a prior session ended with /checkpoint. Loads the most recent checkpoint for the current project and primes the agent with full context before continuing.`
-- **Frontmatter** → added `argument-hint: "[checkpoint-timestamp]"` + `allowed-tools: [Read, Bash, Grep, Glob, AskUserQuestion]`
-
-### `/newproject`
-- **Description (after benchmark-driven revision)** → `Use when bootstrapping a new project under a configured workspace directory ($WORKSPACE_DIR, default ~/projects/), or when an existing project folder needs the standard infrastructure (CLAUDE.md stub, memory dir, optional git init, optional umbrella entry). Triggers only when the user references a project folder under the workspace — do NOT use for generic git init, npm/Xcode init, or single-file creation. Idempotent — never overwrites existing user content.`
-- **Frontmatter** → added `argument-hint: "[project-name]"` + `allowed-tools: [Read, Write, Edit, Bash, Grep, Glob, AskUserQuestion]`
-
-### `/skill-dict`
-- **Description** → `Use when the user types /skill-dict, asks about their personal skill library at ~/skills-library/, asks "what does <skill> do" about a library entry, asks to sync the library after installing a plugin, or asks to add a skill to the library.`
-- **Body refactor**: extracted three subcommand bodies into `references/sync.md`, `references/check-updates.md`, `references/add.md`. SKILL.md now 440 words (was ~1500).
+### `/pickup`
+`Use when the user says "pickup", asks "where were we" after opening a fresh window, or wants to resume/pick up their work from a prior session that ended with /putdown — loads the most recent putdown file (the handoff note) for the current project and primes the agent with full context before continuing. Do NOT use for reopening a previous Claude conversation (that is the built-in /resume picker) or for resuming media, downloads, paused processes, or VMs.`
+- **Frontmatter** → `argument-hint: "[putdown-timestamp]"` + `allowed-tools: [Read, Bash, Grep, Glob, AskUserQuestion]`
 
 ---
 
 ## Benchmark eval details (per skill)
 
-### `/checkpoint` — 100% / 100%
+### `/putdown` — 100% / 100%
 
-All 10 should-trigger queries fired correctly (running out of context, handoff before clearing, stepping away, etc.). All 10 should-not-trigger queries correctly abstained (save file, git commit, db backup, screenshot, .env edit, deploy pause, transcript, bookmark, stash).
+All 10 should-trigger queries fired (bare `putdown`, "wrap up this session", "I'm about to /clear — capture where we are", "save your progress, gotta run", "context window is getting full", etc.). All 10 should-not-trigger correctly abstained — including the sharp near-misses: `rewind my code to before the last prompt` (the built-in `/rewind`), `add a checkpoint to the training loop every 100 steps` (ML checkpoint), `git checkout the checkpoint tag`, `commit and push what we have, not done yet` (a mid-work backup, not a session end), and `put down the iPad`.
 
-**Judge summary**: "Description cleanly distinguishes session-handoff intent from generic save/pause/backup verbs; no false positives or negatives."
+### `/pickup` — 100% / 100% (after one revision)
 
-### `/resume` — 100% / 100%
+All 10 should-trigger fired (bare `pickup`, "pick up where we left off", "load the latest putdown", "continue from the last putdown", "what was I doing? load my session state", etc.). All 10 should-not-trigger correctly abstained — notably `resume my last claude conversation` (that's the built-in `/resume` picker, not this skill), `resume the paused download`, `resume playback`, `write a resume for my job application`, and `resume the VM from a snapshot`.
 
-All 10 should-trigger fired (slash command, "pick up", "load checkpoint", "fresh window, where were we", etc.). All 10 should-not-trigger correctly abstained (resume music, resume paused process, continue an algorithm, restart dev server, etc.).
-
-**Judge summary**: "The explicit mention of '/checkpoint' and 'fresh Claude Code session' clearly scopes the skill to session continuity, avoiding confusion with generic 'resume/restore/continue' verbs."
+**Revision applied:** the first re-eval pass missed `"fresh window, where were we?"` (0/3). The carve-out that keeps the skill off `resume my last claude conversation` was also suppressing this legitimate fresh-window trigger. Adding `asks "where were we" after opening a fresh window` to the description recovered it (3/3) without reintroducing the conversation-picker false-trigger — confirmed by re-eval.
 
 ### `/newproject` — 90% / 100% pre-revision → 100% / 100% expected post-revision
 
 One initial miss on query #8 ("New project: recipe-app") — the strict judge required an explicit workspace-directory reference. All 10 should-not-trigger correctly abstained.
 
-**Judge summary**: "Skill triggers reliably on explicit workspace-directory cues and correctly abstains from generic new-project/new-file requests; one ambiguous bare 'new project' query failed under strict rule."
-
 **Revision applied**: explicit "do NOT use for generic 'new project'..." guard added to the description. Trades a tiny bit of recall on ambiguous phrasing for stronger precision and self-documentation. Users can still invoke the skill explicitly with `/newproject` in any case.
 
 ### `/skill-dict` — 100% / 100%
 
-All 10 should-trigger fired (`/skill-dict`, "skills library", "skill catalog", "what does /checkpoint do", "sync after plugin install", etc.). All 10 should-not-trigger correctly abstained (English dictionary, code function, git fork sync, dotfiles sync, etc.).
+All 10 should-trigger fired (`/skill-dict`, "skills library", "skill catalog", "what does <skill> do", "sync after plugin install", etc.). All 10 should-not-trigger correctly abstained (English dictionary, code function, git fork sync, dotfiles sync, etc.).
 
 **Judge summary**: "Description cleanly discriminates skill-library queries from unrelated dictionary/library/sync requests."
 
@@ -106,15 +88,6 @@ All 10 should-trigger fired (`/skill-dict`, "skills library", "skill catalog", "
 If you change a description (yours or upstream), re-run the eval to confirm you haven't regressed:
 
 1. Draft your own 20-query suite per skill — 10 realistic should-trigger + 10 adversarial near-miss should-not-trigger.
-2. For each query, ask a fresh LLM-as-judge (a sub-agent works well): "Would Claude with this skill loaded — and *only* this skill description as context — invoke it on the user query `<query>`? Answer TRIGGER or NO_TRIGGER with one sentence of reasoning."
+2. Run each query as a real trigger test against the skill description (skill-creator's `run_eval` does this), or with an LLM-as-judge: "Would Claude with only this skill description loaded invoke it on `<query>`? TRIGGER or NO_TRIGGER, one sentence of reasoning."
 3. Score against expected labels. Aim for ≥80% on both metrics; the current bar is 100% — don't regress without good reason.
-
-The full 20-query suites used here are reproducible in [CONTRIBUTING.md](CONTRIBUTING.md).
-
----
-
-## Reproducibility note
-
-The benchmark used 4 parallel sub-agent invocations (one per skill) with each sub-agent grading its skill's 20 queries against the current description. The judge's instructions explicitly required strict scoring — "would a careful Claude agent reading this description fire the skill?" — so over-triggering and under-triggering both count as errors.
-
-Sub-agent transcripts and timestamped verdicts are not retained here; what's preserved is the per-skill summary + the judge's qualitative summary of the description's behavior. If you want full per-query transcripts, fork the repo and re-run with logging.
+4. Heed the harness note above: serial probes, real skill moved aside, an available model.
