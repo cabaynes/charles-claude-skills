@@ -8,14 +8,17 @@ Production-quality slash-command skills for [Claude Code](https://claude.com/cla
 
 ## Skills in this repo
 
-**Session-continuity pair (always install together — they share a folder):**
+**Session continuity (one folder — `/putdown` + `/pickup` are a required pair; `/takenotes` is an optional third):**
 
 | Skill | What it does |
 |---|---|
-| `/putdown` | Distills session state into a handoff file before you clear context |
+| `/putdown` | Distills session state into a handoff file before you clear context, then commits and pushes |
 | `/pickup` | Loads the most recent putdown in a fresh session |
+| `/takenotes` | Harvests what a session *learned* into memory, `CLAUDE.md`, or `docs/` — and corrects what's already stored and has since gone stale |
 
-Pair docs: [skills/session-continuity/README.md](skills/session-continuity/README.md)
+Docs: [skills/session-continuity/README.md](skills/session-continuity/README.md)
+
+The split is by lifetime: a putdown is a note to your next session and goes stale once you act on it; a takenote is a fact you keep forever. Install all three and `/putdown` chains to `/takenotes` automatically; install only the pair and `/putdown` falls back to its own lighter memory step.
 
 **Standalone utilities:**
 
@@ -30,6 +33,8 @@ Pair docs: [skills/session-continuity/README.md](skills/session-continuity/READM
 git clone https://github.com/cabaynes/charles-claude-skills.git
 # Session-continuity pair (one command, both halves):
 cp -r charles-claude-skills/skills/session-continuity/{putdown,pickup} ~/.claude/skills/
+# Optional third — memory harvesting; /putdown will chain to it if present:
+cp -r charles-claude-skills/skills/session-continuity/takenotes ~/.claude/skills/
 # Standalone, opt-in:
 cp -r charles-claude-skills/skills/{newproject,skill-dict} ~/.claude/skills/
 ```
@@ -54,6 +59,8 @@ These aren't just "skills I wrote" — each was scored against an 18-rule rubric
 | `/pickup` | 10/10 | 10/10 |
 | `/newproject` | 10/10 (post-revision) | 10/10 |
 | `/skill-dict` | 10/10 | 10/10 |
+
+`/takenotes` (added 2026-08-03) has **not** been through this trigger benchmark. It was validated differently — behaviourally, with subagents executing it against a sandbox containing a deliberately poisoned memory, over two rounds that found and closed ten defects. That's a test of whether the skill *does the right thing*, not of whether it *fires at the right time*; the trigger benchmark is still outstanding.
 
 Full methodology, per-query verdicts, and revision rationale in [eval-results.md](eval-results.md).
 

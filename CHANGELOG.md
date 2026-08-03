@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented here. Format roughly follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.5.0] — 2026-08-03
+
+### Added
+
+- **`/takenotes`** — a third skill in `skills/session-continuity/`, optional and independent of the `/putdown` + `/pickup` pair. Where a putdown carries *session state* forward (and goes stale the moment you act on it), `/takenotes` writes what a session *learned* into permanent storage: typed memory, `CLAUDE.md`, or a `docs/` file. Three passes — **harvest** the session, **reconcile** what's already stored against what this session established, **route** each finding to where it belongs. The reconcile pass is the part nothing else does: a memory saying *"do not add a webhook receiver, the vendor cannot call out"* doesn't just sit there being outdated, it argues a future session out of work you already shipped. It also guards `CLAUDE.md` — anything over ~15 lines becomes a `docs/` spoke with a descriptive pointer, regardless of the file's current length, because a block that fits under any cap still costs context on every session start.
+
+### Changed
+
+- **`/putdown` now chains to `/takenotes` when it's installed.** Its Steps 2–3 invoke `/takenotes` instead of doing memory updates inline, so a single `/putdown` gets the full harvest-and-reconcile before the handoff is written — and the commit in Step 4.5 sweeps up whatever it wrote. A new **Step 0** announces both skills and their order before any work starts, and Step 5 reports `/takenotes`' result on its own labelled line (explicitly saying so when nothing durable was found, since a silent absence looks like a skipped step).
+- **`/putdown` degrades gracefully without `/takenotes`.** If the skill isn't installed it falls back to a reduced inline memory step — no reconcile pass, but functional. Neither skill hard-depends on the other, and `/takenotes` can be installed or removed later without touching `/putdown`.
+- **`/putdown`'s description no longer omits the memory step.** It previously described only the handoff and the commit/push, which risked an agent following the description and skipping Steps 2–3 entirely — the exact failure mode Anthropic's skill-authoring guidance warns about when a description summarises the workflow.
+
+### Notes
+
+- `/takenotes` has not yet been through the trigger-accuracy benchmark that the other four skills passed. It was validated behaviourally instead — see [eval-results.md](eval-results.md).
+- The public `/takenotes` is a **parameterised fork**, hand-maintained like `/newproject` rather than auto-snapshotted. The author's local copy is coupled to a specific shared-memory layout (a canonical store with symlinks fanned into each project); the public version treats that as an optional pattern it detects rather than a requirement.
+
 ## [0.4.0] — 2026-06-13
 
 ### Changed (breaking: storage path)

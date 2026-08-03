@@ -1,6 +1,6 @@
 ---
 name: putdown
-description: Use when the user says "putdown", when ending or stepping away from a working session, or when the context window is filling up (around 50% used). Creates a handoff file that a fresh Claude Code session reads (via /pickup) to resume without losing momentum, then commits and pushes all session work — a putdown means the session is ending, nothing stays unpushed.
+description: Writes a session handoff file that a fresh Claude Code session reads via /pickup, harvests durable knowledge into memory and CLAUDE.md (via /takenotes when installed), then commits and pushes all session work. Use when the user says "putdown", when ending or stepping away from a working session, or when the context window is filling up (around 50% used). Do NOT use for pausing media, downloads, background processes, or VMs.
 argument-hint: "[project-slug]"
 allowed-tools:
   - Read
@@ -16,6 +16,18 @@ allowed-tools:
 The user is about to clear the context window and start fresh. Your job: capture **everything a new agent would need** so the next session loses no momentum.
 
 > Renamed from `/checkpoint` on 2026-06-12 (paired with `/resume` → `/pickup`) because those names shadow Claude Code built-ins (`/checkpoint` aliases `/rewind`; `/resume` opens the conversation picker). On 2026-06-13 the handoff files also moved from `.checkpoints/` → `.putdowns/` to drop the old term entirely. If you ever see a stray `.checkpoints/` folder, it predates the move — treat it as a putdown.
+
+## Step 0 — Announce what's about to run
+
+If `/takenotes` is installed, a putdown is two operations, not one. Print this first so the user knows what's running and in what order:
+
+```
+/putdown runs two skills, in this order:
+  1. /takenotes — harvest this session into memory, CLAUDE.md, and docs/
+  2. /putdown   — write the handoff file, then commit and push everything
+```
+
+If `/takenotes` is not installed, skip the announcement. Either way this is an announcement, not a prompt — don't wait for confirmation, continue to Step 1.
 
 ## Step 1 — Read current state (parallel)
 
@@ -37,21 +49,32 @@ Also pull from your conversation memory:
 - Any decisions made with non-obvious rationale?
 - Any errors, blockers, or open questions waiting on the user?
 
-## Step 2 — Update memory files
+## Steps 2–3 — Harvest durable knowledge
 
-Update auto-memory **only** for things that match the memory rules in the system prompt (user, feedback, project, reference). Do not save ephemeral conversation state to memory — that goes in the handoff file, not memory.
+**If `/takenotes` is installed** — it ships alongside this skill in the session-continuity package —
+**invoke it and follow it to completion before continuing.** It harvests the session, reconciles what
+is already in memory and `CLAUDE.md` against what this session actually established (correcting
+anything that has since become false), and routes each finding to memory, `CLAUDE.md`, or a `docs/`
+spoke.
 
-Specifically:
-- If a `project_*.md` memory exists for this project, update it with the current state (status, what's next, blockers). Always convert relative dates to absolute dates.
-- If something the user said this session qualifies as feedback (correction or validated approach), save it.
-- If you learned something new about the user's role/preferences, update `user_profile.md`.
+**If it isn't installed**, do this inline instead — a reduced version with no reconcile pass:
 
-## Step 3 — Update the project CLAUDE.md (if applicable)
+- Update auto-memory **only** for things matching the memory rules (user, feedback, project,
+  reference). If a `project_*.md` memory exists, update it with current state (status, what's next,
+  blockers), converting relative dates to absolute.
+- If the user corrected your approach this session, save that as feedback. If you learned something
+  about their role or preferences, update the user memory.
+- If there's a `CLAUDE.md` in the project directory, add or update **stable** facts only
+  (architecture, conventions, how to run and test it). Do NOT put session state in it — that belongs
+  in the handoff file. If none exists and the project has accumulated real conventions, suggest
+  creating one; don't create it unprompted.
 
-If there's a `CLAUDE.md` in the current project directory:
-- Add or update sections that reflect **stable** facts about the project (architecture, conventions, how to run it, how to test it).
-- Do NOT pollute CLAUDE.md with session-state ("we're currently working on X"). That belongs in the handoff file.
-- If no project CLAUDE.md exists and the project has accumulated meaningful conventions, suggest creating one — don't create unprompted.
+Either way, two things hold:
+
+- **Ephemeral session state stays out of memory.** It belongs in the handoff file below.
+- **Nothing here commits.** Step 4.5 commits and pushes everything, including whatever this step wrote.
+
+Keep the result — you'll echo a one-line version in Step 5.
 
 ## Step 4 — Write the handoff file
 
@@ -124,7 +147,7 @@ After saving, print to chat — in this exact order:
      - **Exception:** if MCP servers or config were added/changed *this session*, `/clear` won't load them — the process must be restarted. Tell them to fully quit (`Ctrl+C` twice, or `/exit`) and relaunch `claude`, then `/pickup`.
    - **VSCode visual-editor panel, or any other/unknown surface** (`CLAUDE_CODE_ENTRYPOINT` is anything other than `cli`, or empty) — `/clear` does **not** reliably free context here. Tell the user to **`Cmd+W` to close this Claude Code window, then open a new Claude Code window** in VSCode. (Closing affects only this window — other VSCode windows stay untouched. Note: `Cmd+Shift+P → "Developer: Reload Window"` does NOT actually free the context window — you confirmed this.)
 3. A code block containing exactly `/pickup` — what they type once the context is cleared (in the CLI, right after `/clear`; in a new/reopened window otherwise)
-4. A one-line confirmation of what memory/CLAUDE.md was updated
+4. **The result of Steps 2–3, labelled with its source** — what memory, `CLAUDE.md`, and `docs/` files were written or corrected. If `/takenotes` ran, label it as such so the user can see both skills fired, e.g. `takenotes: 2 memories updated, 1 created, CLAUDE.md +3 lines`. If nothing durable was found, say so explicitly rather than omitting the line — a silent absence looks like a skipped step.
 5. The commit + push result: `<branch> @ <short SHA> pushed to <repo>` — or a **prominent warning** if there was no remote or the push failed (that work is invisible to Claude Code on the web until pushed)
 
 Keep your final reply tight — the handoff document does the heavy lifting; don't summarize it again in chat.

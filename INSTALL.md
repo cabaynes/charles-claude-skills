@@ -1,6 +1,6 @@
 # Install
 
-Three steps to install any combination of the four skills in this repo. They're all standalone except for the **session-continuity pair** (`/putdown` + `/pickup`), which must always be installed together.
+Install any combination of the five skills in this repo. They're all standalone except for the **session-continuity pair** (`/putdown` + `/pickup`), which must always be installed together. `/takenotes` lives in the same folder as that pair but is independent — install it with them, without them, or add it later.
 
 ## Prerequisite
 
@@ -20,6 +20,24 @@ That copies **both** skill folders into `~/.claude/skills/` in one command. Veri
 ```bash
 ls ~/.claude/skills/putdown/SKILL.md ~/.claude/skills/pickup/SKILL.md
 ```
+
+No environment-variable setup required.
+
+### 1b. Recommended companion: `/takenotes`
+
+Lives in the same folder but is **not** part of the required pair — `/putdown` and `/pickup` work without it. Install it if you want session *knowledge* kept permanently, not just session *state* carried forward:
+
+```bash
+cp -r charles-claude-skills/skills/session-continuity/takenotes ~/.claude/skills/
+```
+
+```bash
+ls ~/.claude/skills/takenotes/SKILL.md
+```
+
+**Install order doesn't matter, but the effect is one-directional:** once `/takenotes` is present, `/putdown` detects it and runs it automatically as its Steps 2–3, announcing both skills up front. Without it, `/putdown` uses its own reduced inline memory step. Nothing breaks either way, and you can add or remove `/takenotes` later without touching `/putdown`.
+
+`/takenotes` also works entirely on its own — you can install it without `/putdown` or `/pickup` at all.
 
 No environment-variable setup required.
 

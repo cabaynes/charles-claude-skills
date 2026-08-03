@@ -83,6 +83,53 @@ All 10 should-trigger fired (`/skill-dict`, "skills library", "skill catalog", "
 
 ---
 
+## `/takenotes` — behavioural validation (2026-08-03)
+
+`/takenotes` has **not** been through the trigger-accuracy benchmark above. That benchmark answers
+"does the skill fire at the right time?" — a description question. `/takenotes` was validated against
+a different question first: **does it do the right thing once it fires?**
+
+### Method
+
+Subagents executed the skill against a sandbox project seeded with a **deliberately poisoned
+memory** — one asserting the exact opposite of what the session had just built:
+
+> `project_widget.md`: *"The vendor has no webhook support… Do not add a webhook receiver — the
+> vendor cannot call out."*
+
+…paired with a session in which a webhook receiver had just been shipped and the polling module
+deleted. A skill that merely appends new facts leaves that memory in place, where it will argue a
+future session **out of** working code. Catching it is the sharpest available test of the reconcile
+pass, which is the skill's whole reason to exist.
+
+Three runs: a full harvest, a single-fact request (to test the scope gate), and a **no-skill
+baseline control** given only a well-written hand-typed instruction.
+
+### Results
+
+| Round | Outcome |
+|---|---|
+| 1 | 6 defects found — most serious: the memory-directory fallback would run `mkdir -p /memory` at the **filesystem root**, because the variable is provably empty in exactly that branch. Also: the single-fact path referenced the schema, dedup rule, index-pointer rule and scope routing from steps it explicitly told the agent to skip. |
+| 2 | 5 of 6 closed; 4 new found — including that the single-fact path would apply a cross-project preference **silently**, because the "tell the user" instruction lived in a skipped step. |
+| Final | 10 defects closed across both rounds. Severity fell from *writes to filesystem root* → *inconsistent file naming* → *report formatting*, which is the signal it had converged. |
+
+### The honest caveat
+
+**The baseline control performed comparably.** With no skill at all — just a carefully written
+paragraph — the agent caught the poisoned memory, extracted oversized content to `docs/`, and flagged
+facts it couldn't verify. So the skill's value is not "better output than a good prompt."
+
+Its value is that it's repeatable without retyping the prompt, that `/putdown` invokes it
+automatically at session end, and that it encodes environment specifics a prompt can't carry. The
+sandbox exercised none of that last category, so this test **understates** rather than overstates the
+real-world difference.
+
+### Outstanding
+
+The 20-query trigger benchmark. `/takenotes` has a broad trigger surface ("remember…", "save what we
+learned", "update your memory") that overlaps with ordinary memory writes, so precision is the metric
+to watch when it is run.
+
 ## How to re-run the eval
 
 If you change a description (yours or upstream), re-run the eval to confirm you haven't regressed:

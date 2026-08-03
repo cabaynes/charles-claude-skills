@@ -5,8 +5,22 @@
 # Source of truth: ~/.claude/skills/<name>/  (Charles's local, daily-use copies)
 # Target:          this repo's skills/<name>/  (sanitized public snapshot)
 #
-# This script does NOT touch /newproject — that skill has a separate parameterized
-# fork (skills/newproject/SKILL.md) maintained by hand.
+# This script does NOT copy three skills — each has a parameterized public fork that is
+# maintained BY HAND, because the local version encodes setup this repo's users don't have:
+#
+#   /newproject  — local version hardcodes one workspace layout; public version is parameterized.
+#   /takenotes   — local version assumes a canonical shared-memory store with symlinks fanned
+#                  into every project, plus a sync script to rebuild them. The public version
+#                  treats that as an optional pattern it DETECTS (Step 1c looks for symlinks)
+#                  rather than a requirement, so it works on a plain single-project setup.
+#   /putdown     — the public version must degrade gracefully when /takenotes is absent
+#                  ("if installed, invoke it; otherwise do this inline"). The local version
+#                  invokes it unconditionally, because locally it is always installed.
+#                  Auto-copying would silently delete that fallback and break standalone installs.
+#
+# These three are still SANITIZED and residue-checked below (sanitization is idempotent, so
+# running it over an already-clean hand-maintained file is a harmless no-op) — they are just
+# never overwritten from ~/.claude/skills/.
 #
 # Run from anywhere; resolves its own location.
 
@@ -18,12 +32,11 @@ PUBLIC_SKILLS="${REPO_DIR}/skills"
 
 echo "Refreshing public snapshot in ${PUBLIC_SKILLS}/ from ${LOCAL_SKILLS}/"
 
-# --- 1. Copy the session-continuity pair (atomic — both or neither) ---
-echo "  • copying putdown + pickup into session-continuity/"
-mkdir -p "${PUBLIC_SKILLS}/session-continuity/putdown"
+# --- 1. Copy pickup (putdown + takenotes are hand-maintained forks — see header) ---
+echo "  • copying pickup into session-continuity/"
 mkdir -p "${PUBLIC_SKILLS}/session-continuity/pickup"
-cp "${LOCAL_SKILLS}/putdown/SKILL.md" "${PUBLIC_SKILLS}/session-continuity/putdown/SKILL.md"
 cp "${LOCAL_SKILLS}/pickup/SKILL.md" "${PUBLIC_SKILLS}/session-continuity/pickup/SKILL.md"
+echo "  • SKIPPING putdown + takenotes (hand-maintained public forks — do not auto-copy)"
 
 # --- 2. Copy skill-dict (including references/) ---
 echo "  • copying skill-dict + references/"
@@ -38,6 +51,7 @@ echo "  • sanitizing personal paths and names"
 SANITIZE_TARGETS=(
   "${PUBLIC_SKILLS}/session-continuity/putdown/SKILL.md"
   "${PUBLIC_SKILLS}/session-continuity/pickup/SKILL.md"
+  "${PUBLIC_SKILLS}/session-continuity/takenotes/SKILL.md"
   "${PUBLIC_SKILLS}/skill-dict/SKILL.md"
   "${PUBLIC_SKILLS}/skill-dict/references/sync.md"
   "${PUBLIC_SKILLS}/skill-dict/references/check-updates.md"
