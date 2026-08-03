@@ -51,16 +51,17 @@ These aren't just "skills I wrote" — each was scored against an 18-rule rubric
 - **LLM-as-judge scoring** against the skill description
 - **Threshold**: ≥80% precision and recall to pass
 
-**Results (2026-05-13):**
+**Results:**
 
-| Skill | Recall | Precision |
-|---|---|---|
-| `/putdown` | 10/10 | 10/10 |
-| `/pickup` | 10/10 | 10/10 |
-| `/newproject` | 10/10 (post-revision) | 10/10 |
-| `/skill-dict` | 10/10 | 10/10 |
+| Skill | Recall | Precision | Run |
+|---|---|---|---|
+| `/putdown` | 10/10 | 10/10 | 2026-05-13 |
+| `/pickup` | 10/10 | 10/10 | 2026-05-13 |
+| `/newproject` | 10/10 (post-revision) | 10/10 | 2026-05-13 |
+| `/skill-dict` | 10/10 | 10/10 | 2026-05-13 |
+| `/takenotes` | 10/10 | 10/10 | 2026-08-03 |
 
-`/takenotes` (added 2026-08-03) has **not** been through this trigger benchmark. It was validated differently — behaviourally, with subagents executing it against a sandbox containing a deliberately poisoned memory, over two rounds that found and closed ten defects. That's a test of whether the skill *does the right thing*, not of whether it *fires at the right time*; the trigger benchmark is still outstanding.
+`/takenotes` also went through a second, different kind of validation: subagents **executed** it against a sandbox seeded with a deliberately poisoned memory, over two rounds that found and closed ten defects. Trigger accuracy measures whether a skill *fires at the right time*; that measures whether it *does the right thing once it fires*. Both are in [eval-results.md](eval-results.md).
 
 Full methodology, per-query verdicts, and revision rationale in [eval-results.md](eval-results.md).
 

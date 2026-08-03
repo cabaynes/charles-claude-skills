@@ -16,7 +16,7 @@ All notable changes to this project will be documented here. Format roughly foll
 
 ### Notes
 
-- `/takenotes` has not yet been through the trigger-accuracy benchmark that the other four skills passed. It was validated behaviourally instead — see [eval-results.md](eval-results.md).
+- `/takenotes` passed the same 20-query trigger-accuracy benchmark as the other four skills — 100% precision, 100% recall — and was additionally validated behaviourally against a poisoned-memory sandbox. Both are documented in [eval-results.md](eval-results.md).
 - The public `/takenotes` is a **parameterised fork**, hand-maintained like `/newproject` rather than auto-snapshotted. The author's local copy is coupled to a specific shared-memory layout (a canonical store with symlinks fanned into each project); the public version treats that as an optional pattern it detects rather than a requirement.
 
 ## [0.4.0] — 2026-06-13

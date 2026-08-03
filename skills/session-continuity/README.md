@@ -137,7 +137,9 @@ If you have multiple parallel sessions in the same project (e.g. two VSCode wind
 
 `/putdown` and `/pickup` each passed skill-creator's trigger-accuracy benchmark at 100% precision and 100% recall on a 20-query test set (10 should-trigger + 10 adversarial should-not-trigger). See the root [eval-results.md](../../eval-results.md) for full methodology.
 
-`/takenotes` has **not** been through that trigger benchmark yet. It was instead validated behaviourally: subagents ran it against a sandbox containing a deliberately poisoned memory (one asserting the opposite of what the session had just built), across two rounds that found and closed ten defects. Details in [eval-results.md](../../eval-results.md).
+`/takenotes` passed the same benchmark at 100% / 100% on 2026-08-03 — including adversarial near-misses aimed at its broad trigger surface, such as *"take notes on this meeting transcript"* (contains the skill's literal name, correctly excluded) and *"remind me to call the vendor tomorrow"*. It also stayed out of `/putdown`'s and `/pickup`'s lanes, which matters when all three ship together.
+
+It was additionally validated **behaviourally**: subagents ran it against a sandbox containing a deliberately poisoned memory — one asserting the opposite of what the session had just built — across two rounds that found and closed ten defects. Details for both in [eval-results.md](../../eval-results.md).
 
 ## Install
 

@@ -13,8 +13,9 @@
 | `/pickup` | 10/10 (100%) | 10/10 (100%) | ✅ PASS | Re-evaluated 2026-06-13; one revision to recover a fresh-window phrasing (below) |
 | `/newproject` | 9/10 (90%) → 10/10 expected | 10/10 (100%) | ✅ PASS (revised) | Description rewritten with explicit "do NOT" guards; added `argument-hint` + `allowed-tools` |
 | `/skill-dict` | 10/10 (100%) | 10/10 (100%) | ✅ PASS | Description tightened; subcommand bodies extracted to `references/`; body reduced from ~1500 → 440 words |
+| `/takenotes` | 10/10 (100%) | 10/10 (100%) | ✅ PASS | Added + evaluated 2026-08-03. Also validated behaviourally against a poisoned-memory sandbox (below) |
 
-**All four skills pass the ≥80% threshold on both precision and recall.**
+**All five skills pass the ≥80% threshold on both precision and recall.**
 
 ---
 
@@ -83,11 +84,40 @@ All 10 should-trigger fired (`/skill-dict`, "skills library", "skill catalog", "
 
 ---
 
+## `/takenotes` — trigger benchmark (2026-08-03) — 100% / 100%
+
+Run with the LLM-as-judge variant described under "How to re-run the eval" below (not skill-creator's
+`run_eval` harness, which produced the 2026-05-13 numbers). Judge saw only the skill description and
+20 shuffled, unlabelled queries — 10 realistic should-trigger, 10 adversarial should-not-trigger.
+
+**Recall 10/10 · Precision 10/10.**
+
+The adversarial half was aimed squarely at this skill's known weak spot. Its description was
+deliberately widened to cover "asks you to remember or record something," which risks swallowing any
+sentence containing "remember." The near-misses tested exactly that:
+
+| Adversarial query | Result | Why it's a trap |
+|---|---|---|
+| "take notes on this meeting transcript and summarize the action items" | NO_TRIGGER ✓ | Contains the skill's **literal name**. Only the explicit exclusion keeps it out. |
+| "remind me to call the vendor tomorrow" | NO_TRIGGER ✓ | "remind" vs "remember" — one letter, entirely different intent. |
+| "what's currently in my memory files?" | NO_TRIGGER ✓ | Memory-topical, but a read rather than a write. |
+| "where were we last session?" | NO_TRIGGER ✓ | Belongs to `/pickup`. |
+| "I'm done for the day, wrap up and push" | NO_TRIGGER ✓ | Belongs to `/putdown`. |
+| "write documentation for this module" | NO_TRIGGER ✓ | Authoring docs ≠ harvesting session knowledge into them. |
+
+The last two matter most: all three session-continuity skills ship in one folder, so a skill that
+poached its neighbours' triggers would be worse than one that occasionally under-fires. It stayed in
+its lane on both.
+
+Should-trigger queries covered the full declared surface: the literal keyword, whole-session harvest
+phrasings ("save what we learned this session"), post-solution capture ("make sure you remember
+how"), decision recording, dead-end capture, and single facts ("note that the staging API key rotates
+monthly").
+
 ## `/takenotes` — behavioural validation (2026-08-03)
 
-`/takenotes` has **not** been through the trigger-accuracy benchmark above. That benchmark answers
-"does the skill fire at the right time?" — a description question. `/takenotes` was validated against
-a different question first: **does it do the right thing once it fires?**
+Trigger accuracy answers "does the skill fire at the right time?" — a description question. This
+second pass answers a different one: **does it do the right thing once it fires?**
 
 ### Method
 
@@ -124,11 +154,13 @@ automatically at session end, and that it encodes environment specifics a prompt
 sandbox exercised none of that last category, so this test **understates** rather than overstates the
 real-world difference.
 
-### Outstanding
+### What this pass did not cover
 
-The 20-query trigger benchmark. `/takenotes` has a broad trigger surface ("remember…", "save what we
-learned", "update your memory") that overlaps with ordinary memory writes, so precision is the metric
-to watch when it is run.
+Both validations are single-run. The trigger benchmark is one judge pass over 20 queries, not a
+multi-sample average, so a genuinely marginal query could land either way on a re-run. And the
+behavioural fixes from round 2 were not themselves re-tested — the reason to stop was that defect
+severity had fallen from *writes to filesystem root* to *report formatting*, not that the skill was
+proven clean.
 
 ## How to re-run the eval
 
