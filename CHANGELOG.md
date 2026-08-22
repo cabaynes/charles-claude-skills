@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here. Format roughly follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.6.0] — 2026-08-22
+
+### Added
+
+- **`/takenotes` Step 3.5 — superseded-fact sweep.** The reconcile pass discovered its targets through the `MEMORY.md` index hooks, which left a blind spot: when a session changes a previously-true fact (a location, an employer, a vendor), the memory that *owns* the topic gets corrected, but a file that merely *mentions* the old fact — under a one-line hook that says nothing about it — never gets opened, so the stale claim survives every reconcile. Found in the author's own store, where a wedding-venue change was corrected in the owning project's memory the day it happened yet sat wrong in the shared user profile for 19 days. Step 3.5 closes the gap: grep for the **old** term (not the topic — the topic also matches the freshly-corrected files) across the project's memory and, where one exists, the shared canonical store, then reconcile every hit. Historical mentions explicitly recorded as superseded are kept; only the old fact asserted as *current* is stale.
+
 ## [0.5.0] — 2026-08-03
 
 ### Added

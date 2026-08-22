@@ -189,6 +189,30 @@ deleted one both come back missing. Say so and reconcile from what the session e
 
 Reconcile `MEMORY.md` too: if its one-line hooks no longer describe their files, fix them.
 
+### Step 3.5 — Superseded-fact sweep (hook-blind stale facts)
+
+If this session established that a previously-true fact **changed** — a location, an employer, a
+vendor, a tool choice, a project's status — do not trust the `MEMORY.md` hooks to find every file
+that mentions it. Hooks are one line; a fact buried in a file body but absent from its hook is
+invisible to hook-based discovery. A relocation can get corrected in the project memory that owns
+it while a `user_*` profile two directories over still asserts the old city — nothing in that
+file's one-line hook says "city", so nothing ever prompts opening it, and the stale fact survives
+every reconcile.
+
+Grep for the **old** fact and reconcile every hit — this project's memory, plus the shared
+canonical store if Step 1c found symlinks:
+
+```bash
+grep -Rli "<old term>" "$MEMDIR/memory/" 2>/dev/null   # add the canonical store path if shared
+```
+
+Pick a term specific to the *old* fact (the previous city, the outgoing vendor's name), not the
+topic — the topic also matches the files you just corrected and buries the stale ones under fresh
+hits. Shared-store hits change the fact for every project: fix them through the canonical file,
+never a per-project symlink copy, and flag each in Step 5. A kept-for-history mention ("migrated
+off VendorX 2026-08-03") is not stale — you are sweeping for the old fact still asserted as
+*current*.
+
 ---
 
 ## Step 4 — Route and write
