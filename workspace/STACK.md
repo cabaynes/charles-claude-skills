@@ -1,6 +1,6 @@
 # The full stack, in install order
 
-The workspace guide in this folder gets you the skeleton: one root folder, per-project subfolders, shared memory, and the six skills from this repo. This page is everything else the maintainer runs on top of that, in the order it makes sense to add it, with the one-line installer and the reason each one earns its place.
+The workspace guide in this folder gets you the skeleton: one root folder, per-project subfolders, shared memory, and the four day-to-day skills from this repo. This page is everything else the maintainer runs on top of that, in the order it makes sense to add it, with the one-line installer and the reason each one earns its place.
 
 Versions and commands verified 2026-09-08. Installing a plugin or MCP server takes effect in a **fresh** Claude Code window, not the current one.
 
@@ -10,7 +10,7 @@ Claude Code, git, and optionally the GitHub CLI. Covered by Step 0 of [README.md
 
 ## Layer 1: the workspace pattern and this repo's skills
 
-Covered end to end by [README.md](README.md): the umbrella `CLAUDE.md`, the memory hub and `fanout-memory.sh`, and `/newproject`, `/putdown`, `/pickup`, `/takenotes`, `/skill-dict`, `/grill-me` from `skills/`. Do this first; everything below assumes it.
+Covered end to end by [README.md](README.md): the umbrella `CLAUDE.md`, the memory hub and `fanout-memory.sh`, and the four day-to-day skills, `/newproject`, `/putdown`, `/pickup`, and `/takenotes`. The two other skills in this repo are optional and install with one `cp` each per the root [INSTALL.md](../INSTALL.md): `/skill-dict` (a catalog of the skills you have installed) and `/grill-me` (interrogates a plan before you commit to it). Do this first; everything below assumes it.
 
 ## Layer 2: recommended for everyone (official plugins, no accounts needed)
 
