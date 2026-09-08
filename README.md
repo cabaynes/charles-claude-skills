@@ -26,6 +26,7 @@ The split is by lifetime: a putdown is a note to your next session and goes stal
 |---|---|---|
 | `/newproject` | Bootstrap a configurable workspace project (idempotent) | [skills/newproject/README.md](skills/newproject/README.md) |
 | `/skill-dict` | Manage a personal catalog of installed Claude Code skills | [skills/skill-dict/README.md](skills/skill-dict/README.md) |
+| `/grill-me` | Interrogate a plan, design, or idea before you commit; it asks, it never builds | [skills/grill-me/README.md](skills/grill-me/README.md) |
 
 ## The workspace pattern these skills assume
 
@@ -74,6 +75,7 @@ These aren't just "skills I wrote" — each was scored against an 18-rule rubric
 | `/newproject` | 10/10 (post-revision) | 10/10 | 2026-05-13 |
 | `/skill-dict` | 10/10 | 10/10 | 2026-05-13 |
 | `/takenotes` | 10/10 | 10/10 | 2026-08-03 |
+| `/grill-me` | 10/10 (post-revision) | 10/10 | 2026-09-08 |
 
 `/takenotes` also went through a second, different kind of validation: subagents **executed** it against a sandbox seeded with a deliberately poisoned memory, over two rounds that found and closed ten defects. Trigger accuracy measures whether a skill *fires at the right time*; that measures whether it *does the right thing once it fires*. Both are in [eval-results.md](eval-results.md).
 

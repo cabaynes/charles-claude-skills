@@ -85,6 +85,14 @@ Prove the helper works on your machine before relying on it:
 bash charles-claude-skills/workspace/test-fanout.sh
 ```
 
+## 5. Optional: `/grill-me`
+
+Interrogates a plan or idea instead of building it. Sessions are written to `grill-me-sessions/` in the current directory; add that folder to your project's `.gitignore` if you do not want planning notes committed.
+
+```bash
+cp -r charles-claude-skills/skills/grill-me ~/.claude/skills/
+```
+
 ## Symlink vs. copy
 
 The instructions above use `cp -r` (copy). The alternative is `ln -s` (symlink) — that way, when you `git pull` to update the repo, the installed skills update too.
