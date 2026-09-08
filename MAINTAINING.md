@@ -13,7 +13,8 @@ The release workflow. If you edited a local skill and want the change to show up
 
 | Repo path | Canonical source | Refreshed by |
 |---|---|---|
-| `skills/session-continuity/putdown/SKILL.md` | `~/.claude/skills/putdown/SKILL.md` | `snapshot.sh` |
+| `skills/session-continuity/putdown/SKILL.md` | **canonical here** (hand-maintained fork: degrades gracefully without /takenotes) | Edit directly |
+| `skills/session-continuity/takenotes/SKILL.md` | **canonical here** (hand-maintained fork: detects the shared-memory symlink pattern instead of requiring it) | Edit directly |
 | `skills/session-continuity/pickup/SKILL.md` | `~/.claude/skills/pickup/SKILL.md` | `snapshot.sh` |
 | `skills/skill-dict/SKILL.md` | `~/.claude/skills/skill-dict/SKILL.md` | `snapshot.sh` |
 | `skills/skill-dict/references/*.md` | `~/.claude/skills/skill-dict/references/*.md` | `snapshot.sh` |
@@ -22,6 +23,9 @@ The release workflow. If you edited a local skill and want the change to show up
 | `skills/*/LICENSE` | Copy of root `LICENSE` | Manual copy or `cp` after editing root |
 | `README.md`, `INSTALL.md`, `CONTRIBUTING.md`, `CHANGELOG.md`, `eval-results.md` | **canonical here** | Edit directly |
 | `scripts/snapshot.sh` | **canonical here** | Edit directly |
+| `skills/grill-me/SKILL.md` | `~/.claude/skills/grill-me/SKILL.md` (a symlink to `~/CLAUDE/skills-library/grill-me/SKILL.md`, which is the file to edit) | `snapshot.sh` |
+| `workspace/fanout-memory.sh` | **canonical here** (parameterized fork of the maintainer's local `$WORKSPACE_DIR/scripts/fanout-memory.sh`, which hard-codes one hub path) | Edit directly; run `bash workspace/test-fanout.sh` |
+| `workspace/test-fanout.sh`, `workspace/CLAUDE.md.template`, `workspace/README.md`, `workspace/STACK.md` | **canonical here** | Edit directly; re-verify `STACK.md` install commands against `claude --help` when Claude Code updates |
 
 ## Releasing an edit to an existing skill
 
@@ -104,6 +108,10 @@ grep -rnE '/Users/charles|Charles' ~/CLAUDE/charles-claude-skills/
 # Confirm skills/ has no personal paths or names
 grep -rnE '/Users/charles|Charles' ~/CLAUDE/charles-claude-skills/skills/
 
+# Workspace folder: sanitization plus the helper's own test
+grep -rnE '/Users/charles|Charles|job' ~/CLAUDE/charles-claude-skills/workspace/
+bash ~/CLAUDE/charles-claude-skills/workspace/test-fanout.sh
+
 # Diff against last release
 cd ~/CLAUDE/charles-claude-skills && git diff HEAD~1
 ```
@@ -131,6 +139,7 @@ You can spawn 4 parallel sub-agents (one per skill, one query batch each) to mak
 
 - **Snapshot pattern** = local-as-source, repo-as-snapshot. Lets you edit one place (your daily-use copies) and ship without manual copy-pasting. Sanitization runs as part of the snapshot so you can't accidentally publish `/Users/charles/...` paths.
 - **`/newproject` divergence** = the local version assumes Charles's `~/CLAUDE/` workspace + fan-out memory script; the public version reads `$WORKSPACE_DIR` and works without the helper. Maintaining both isn't free, but the alternatives are worse: either ship a Charles-specific skill nobody else can use, or make Charles's local workflow more complex.
+- **`workspace/fanout-memory.sh` divergence** = same reason as `/newproject`. The local helper hard-codes the maintainer's hub path; the public one derives the hub from `$WORKSPACE_DIR`. Behavior is otherwise identical, and `workspace/test-fanout.sh` pins that behavior (seed, fan-out, idempotent re-run, non-universal files left alone, tilde expansion). Any change to the local helper's behavior gets mirrored here by hand, then the test is re-run.
 - **Bundling `/putdown` + `/pickup` in `session-continuity/`** = they only work as a pair. Structural enforcement prevents anyone (including future-you) from installing half of the feature.
 - **Eval gate on description changes** = trigger accuracy is the one quality metric that's easy to regress and hard to notice. Running the eval before pushing catches that automatically.
 

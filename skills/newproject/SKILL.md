@@ -127,7 +127,7 @@ Then:
 "$WORKSPACE_DIR/scripts/fanout-memory.sh" <name>
 ```
 
-(The fan-out helper is a user-supplied convention for symlinking universal memories from a workspace-level memory hub into each project's memory dir. If you've never used one, ignore — the fallback below handles you.)
+(The fan-out helper ships with this skill's repo at `workspace/fanout-memory.sh`, with a setup guide at `workspace/README.md`. It symlinks universal memories from a workspace-level hub into each project's memory dir. If it isn't installed, the fallback below handles you.)
 
 **Otherwise**: create the memory directory plainly:
 

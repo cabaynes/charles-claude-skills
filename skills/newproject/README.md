@@ -23,7 +23,7 @@ The skill reads one environment variable: **`WORKSPACE_DIR`** (default `~/projec
 export WORKSPACE_DIR=~/projects
 ```
 
-The skill also detects an optional helper script at `$WORKSPACE_DIR/scripts/fanout-memory.sh`. If you keep a workspace-level memory hub and want to symlink universal memories into each project's memory dir, this helper does that. If the helper doesn't exist, the skill falls back to a plain `mkdir -p` for the memory directory — your project still gets a memory dir, just without the universal-symlink fan-out.
+The skill also looks for `$WORKSPACE_DIR/scripts/fanout-memory.sh`. That helper ships in this repo at [`workspace/fanout-memory.sh`](../../workspace/fanout-memory.sh): it symlinks universal memory files from a workspace-level hub into each project's memory dir, so a preference written once applies everywhere. If the helper isn't installed, the skill falls back to a plain `mkdir -p` for the memory directory; your project still gets a memory dir, just without the shared-memory fan-out. Setup guide: [workspace/README.md](../../workspace/README.md).
 
 ## What it creates (in detail)
 
@@ -33,7 +33,7 @@ For `/newproject foo` with `WORKSPACE_DIR=~/projects`:
 |---|---|
 | `~/projects/foo/` | The project folder |
 | `~/projects/foo/CLAUDE.md` | Starter project docs (sections for goals, layout, conventions, references, notes) |
-| `~/.claude/projects/-Users-<you>-projects-foo/memory/` | Claude Code's project memory dir |
+| `~/.claude/projects/-Users-<you>-projects-foo/memory/` | Claude Code's project memory dir (with hub symlinks when the workspace helper is installed) |
 | `~/projects/foo/.git/` | If you say yes to git init |
 | `~/projects/foo/.gitignore` | Standard ignores for Python/Node/macOS |
 | Entry in `~/projects/CLAUDE.md` | If a `## Subprojects` section exists |
@@ -59,7 +59,7 @@ Every step is independent and safe.
 
 - **Set `WORKSPACE_DIR` in your shell rc** once. The skill will ask you the first time; after that, just use it.
 - **Optional umbrella file**: If you keep a top-level `$WORKSPACE_DIR/CLAUDE.md` with a `## Subprojects` section listing each project, `/newproject` will append the new project there. If you don't have one, the skill skips that step silently — it doesn't create the umbrella file unprompted.
-- **Optional fan-out helper**: If you have universal memory files (user profile, secrets-handling rules, etc.) that you want symlinked into every project's memory dir, write a small helper at `$WORKSPACE_DIR/scripts/fanout-memory.sh` and the skill will use it. If you don't, you don't need to do anything.
+- **Optional fan-out helper**: to share universal memory files (user profile, working preferences) across every project, install `workspace/fanout-memory.sh` to `$WORKSPACE_DIR/scripts/` and the skill will use it. See [workspace/README.md](../../workspace/README.md).
 - **Don't fight the idempotence.** If `/newproject foo` skipped something because it already existed, that's intentional. Override by deleting the file/folder first if you want a fresh stub.
 
 ## Why this is better than alternatives

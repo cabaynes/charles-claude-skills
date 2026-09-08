@@ -27,6 +27,20 @@ The split is by lifetime: a putdown is a note to your next session and goes stal
 | `/newproject` | Bootstrap a configurable workspace project (idempotent) | [skills/newproject/README.md](skills/newproject/README.md) |
 | `/skill-dict` | Manage a personal catalog of installed Claude Code skills | [skills/skill-dict/README.md](skills/skill-dict/README.md) |
 
+## The workspace pattern these skills assume
+
+Each skill works on a single project folder. Together they work best on a **multi-project workspace**: one root folder with a short umbrella `CLAUDE.md`, one subfolder per project, and a shared memory hub that a small script symlinks into every project so a preference written once applies everywhere. `/newproject` builds the spokes, `/takenotes` routes memory to hub or project, `/putdown` + `/pickup` carry sessions across the gaps, and `/grill-me` makes you defend a plan before any of that starts.
+
+The [`workspace/`](workspace/) folder has the whole thing: a copy-and-paste setup guide, the `fanout-memory.sh` helper that `/newproject` and `/takenotes` look for, an umbrella `CLAUDE.md` template, a test script that proves the helper works on your machine, and [`STACK.md`](workspace/STACK.md), the rest of the tool stack in install order.
+
+**Setting someone else up, or letting Claude do it?** Point Claude at the guide and say "set me up like this":
+
+```
+https://raw.githubusercontent.com/cabaynes/charles-claude-skills/main/workspace/README.md
+```
+
+The guide opens with a runbook section written for a Claude agent acting on a person's behalf.
+
 ## Install (quick)
 
 ```bash
