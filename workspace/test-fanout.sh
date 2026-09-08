@@ -67,7 +67,8 @@ echo "7. a tilde in WORKSPACE_DIR expands to HOME"
 check "hub path resolved" bash -c "WORKSPACE_DIR='~/CLAUDE' '$SCRIPT' | grep -qF '$HUB'"
 
 echo "8. a real file in a project is never replaced by a symlink; a trailing slash on WORKSPACE_DIR is harmless"
-printf -- '---\nname: user-profile\ndescription: LOCAL copy that must survive\nmetadata:\n  type: user\n---\n' > "$HOME/.claude/projects/$SLUG-keep/memory/user_profile.md" 2>/dev/null || { mkdir -p "$HOME/.claude/projects/$SLUG-keep/memory"; printf -- '---\nname: user-profile\ndescription: LOCAL copy that must survive\nmetadata:\n  type: user\n---\n' > "$HOME/.claude/projects/$SLUG-keep/memory/user_profile.md"; }
+mkdir -p "$HOME/.claude/projects/$SLUG-keep/memory"
+printf -- '---\nname: user-profile\ndescription: LOCAL copy that must survive\nmetadata:\n  type: user\n---\n' > "$HOME/.claude/projects/$SLUG-keep/memory/user_profile.md"
 "$SCRIPT" keep >/dev/null
 check "real file left in place"      not test -L "$HOME/.claude/projects/$SLUG-keep/memory/user_profile.md"
 check "real file content intact"     grep -q 'LOCAL copy that must survive' "$HOME/.claude/projects/$SLUG-keep/memory/user_profile.md"
