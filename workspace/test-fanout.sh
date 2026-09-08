@@ -66,6 +66,15 @@ check "reference file not linked" not test -e "$RECIPES/reference_y.md"
 echo "7. a tilde in WORKSPACE_DIR expands to HOME"
 check "hub path resolved" bash -c "WORKSPACE_DIR='~/CLAUDE' '$SCRIPT' | grep -qF '$HUB'"
 
+echo "8. a real file in a project is never replaced by a symlink; a trailing slash on WORKSPACE_DIR is harmless"
+printf -- '---\nname: user-profile\ndescription: LOCAL copy that must survive\nmetadata:\n  type: user\n---\n' > "$HOME/.claude/projects/$SLUG-keep/memory/user_profile.md" 2>/dev/null || { mkdir -p "$HOME/.claude/projects/$SLUG-keep/memory"; printf -- '---\nname: user-profile\ndescription: LOCAL copy that must survive\nmetadata:\n  type: user\n---\n' > "$HOME/.claude/projects/$SLUG-keep/memory/user_profile.md"; }
+"$SCRIPT" keep >/dev/null
+check "real file left in place"      not test -L "$HOME/.claude/projects/$SLUG-keep/memory/user_profile.md"
+check "real file content intact"     grep -q 'LOCAL copy that must survive' "$HOME/.claude/projects/$SLUG-keep/memory/user_profile.md"
+check "other universal still linked" test -L "$HOME/.claude/projects/$SLUG-keep/memory/feedback_brief.md"
+check "trailing slash resolves same hub" bash -c "WORKSPACE_DIR='$WORKSPACE_DIR/' '$SCRIPT' | grep -qF '$HUB'"
+check "--help works with an empty hub" bash -c "HOME='$TMP/home2' WORKSPACE_DIR='$TMP/home2/CLAUDE' '$SCRIPT' --help | grep -q 'Usage:'"
+
 echo ""
 echo "$pass passed, $fail failed"
 [ "$fail" -eq 0 ]

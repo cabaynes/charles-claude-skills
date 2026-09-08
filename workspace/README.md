@@ -1,6 +1,6 @@
 # A multi-project workspace for Claude Code
 
-The four skills in this repo work on any single project folder. They work best on a **workspace**: one root folder, one subfolder per project, and shared memory that follows you between them. This page is the copy-and-paste setup for that layout. Terminal blocks are marked **Terminal**; prompt blocks are pasted into Claude Code.
+The four day-to-day skills in this repo work on any single project folder. They work best on a **workspace**: one root folder, one subfolder per project, and shared memory that follows you between them. This page is the copy-and-paste setup for that layout. Terminal blocks are marked **Terminal**; prompt blocks are pasted into Claude Code.
 
 Time to a working setup: about twenty minutes. Assumes macOS and a fresh Claude Code install; the shell steps also work on Linux.
 
@@ -8,9 +8,9 @@ Time to a working setup: about twenty minutes. Assumes macOS and a fresh Claude 
 
 A person may point you at this page and say "set me up like this." Treat it as a runbook, in order:
 
-1. **Check preconditions before anything else:** `claude --version`, `git --version`, and whether `gh auth status` succeeds. Report what is missing. Do not install Homebrew or `gh` without asking.
-2. **Follow Step 1 and Prompts 1 through 3 in order, using the commands exactly as written.** Prompts 1 and 2 are written as things the person would paste to you; carry out what they describe.
-3. **Ask before anything with an external footprint:** creating a GitHub repo, installing a plugin, appending to `~/.zshrc`.
+1. **Check preconditions before anything else:** `claude --version`, `git --version`, and whether `gh auth status` succeeds. Report what is missing, ask, and only then run Step 0's commands for what is missing.
+2. **Follow Step 1 and Prompts 1 through 3 in order, using the commands exactly as written.** Prompts 1 and 2 are written as things the person would paste to you; carry out what they describe. Prompt 2 is a live interview: ask the questions and wait for answers; never invent a profile. For Prompt 3 use its non-slash form, and ask the person what to name their first project.
+3. **Ask before anything with an external footprint:** creating a GitHub repo, installing a plugin, appending to `~/.zshrc`. Step 1's block contains the `~/.zshrc` append; ask once before running the block.
 4. **The person's details go only into their own memory hub** (`user_profile.md` under `~/.claude/projects/`). Nothing from this setup is written back into this repo or anywhere public.
 5. **Finish by running the test** from the cloned repo and showing the person its last line, then tell them to open a fresh Claude Code window:
 
@@ -53,6 +53,14 @@ You need Claude Code, git, and optionally the GitHub CLI so `/newproject` can cr
 ```
 xcode-select --install 2>/dev/null
 which brew >/dev/null || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+eval "$(/opt/homebrew/bin/brew shellenv 2>/dev/null || /usr/local/bin/brew shellenv)"
+```
+
+The Homebrew installer asks you to press Return and for your password; answer it, then let the block finish. On Apple Silicon Macs Homebrew lives in `/opt/homebrew`, which is not on the default path; the last line puts it there for this Terminal window, and the installer prints the line to add to your shell profile so it sticks.
+
+Run these two one at a time; both are interactive:
+
+```
 brew install gh
 gh auth login
 ```
@@ -118,7 +126,7 @@ Then add one line to MEMORY.md in that same directory in the form "- [User profi
 
 ## Prompt 3: create the first project
 
-`/newproject` is a slash command, so type it directly. Replace `recipes` with a lowercase, hyphenated name; the skill rejects capitals and spaces, and lowercase names also avoid a macOS case quirk in the memory folder names.
+`/newproject` is a slash command, so type it directly. Replace `recipes` with a lowercase, hyphenated name; the skill rejects capitals and spaces, and lowercase names also avoid a macOS case quirk in the memory folder names. If you also want new repos to carry the session skills for claude.ai/code, do the optional Terminal step further down before running this.
 
 ```
 /newproject recipes
@@ -140,9 +148,9 @@ The umbrella covers everything under `~/CLAUDE`. A global `~/.claude/CLAUDE.md` 
 Create ~/.claude/CLAUDE.md, my global Claude Code instructions that apply in every folder on this machine, if it doesn't already exist. Keep it under 20 lines. Contents: a heading "Global rules (all projects)"; a line saying my personal workspace is ~/CLAUDE and each subfolder there is its own project with its own CLAUDE.md; a line saying to check the project's CLAUDE.md and memory before asking me questions the files already answer; and a line saying never to commit .env files or secrets. Show me the file when done.
 ```
 
-## Prompt 5 (optional): let claude.ai/code use the same skills
+## Optional Terminal step: let claude.ai/code use the same skills
 
-Private repos can carry copies of the session skills at `.claude/skills/` so a web session can `/putdown` and `/pickup` too. `/newproject` seeds those copies automatically **if** a source folder exists. One Terminal line sets that up:
+Private repos can carry copies of the session skills at `.claude/skills/` so a web session can `/putdown` and `/pickup` too. `/newproject` seeds those copies automatically **if** a source folder exists. One Terminal line sets that up (this is a Terminal command, not a prompt):
 
 ```
 mkdir -p ~/CLAUDE/scripts/web-skills && cp -r ~/.claude/skills/{putdown,pickup,takenotes} ~/CLAUDE/scripts/web-skills/ && ls ~/CLAUDE/scripts/web-skills
@@ -185,12 +193,14 @@ Remember this as a universal rule that applies in every project, not just this o
 bash /tmp/charles-claude-skills/workspace/test-fanout.sh
 ```
 
+That path is where Step 1 cloned the repo; macOS clears `/tmp` on reboot, so re-clone or run it from wherever you keep the checkout.
+
 ## Files in this folder
 
 | File | What it is |
 |---|---|
 | `fanout-memory.sh` | The helper. `fanout-memory.sh` shows status, `fanout-memory.sh <name>` seeds one project, `fanout-memory.sh --all` syncs every project. Honours `WORKSPACE_DIR`. |
-| `test-fanout.sh` | Seven-scenario test against a throwaway `HOME`. Exit 0 means the helper works on this machine. |
+| `test-fanout.sh` | Eight-scenario test against a throwaway `HOME`. Exit 0 means the helper works on this machine. |
 | `CLAUDE.md.template` | The umbrella file Step 1 installs. Has the `## Subprojects` heading `/newproject` appends to. |
 | `STACK.md` | Everything the maintainer runs on top of this, in install order, with the reason for each. |
 | `README.md` | This page. |

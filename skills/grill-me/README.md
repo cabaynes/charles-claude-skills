@@ -25,7 +25,7 @@ Written for this workflow in the tradition of community "grill me" interviewer p
 - **Run it before anything hard to reverse:** a spend, a launch, a lease, a rewrite, a migration.
 - **Give it material.** Point it at the plan doc, the repo, or the spreadsheet. Questions grounded in what you actually wrote are far better than generic ones.
 - **Answer honestly, including "I don't know".** Unknowns go to the parking lot and become the to-do list.
-- **Name the session.** It asks for a short plan name so the session file is findable later; sessions live in `grill-me-sessions/` in the current directory (this repo's `.gitignore` excludes that folder so planning notes are never committed by accident).
+- **Name the session.** It asks for a short plan name so the session file is findable later; sessions live in `grill-me-sessions/` in the current directory (add `grill-me-sessions/` to your project's `.gitignore` so planning notes are never committed by accident; this repo already does).
 - **Wrap up explicitly.** Say you are done and it writes the summary; then run `/takenotes` if the decisions should outlive the session.
 
 ## Why this is better than alternatives

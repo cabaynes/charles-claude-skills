@@ -30,7 +30,7 @@ The split is by lifetime: a putdown is a note to your next session and goes stal
 
 ## The workspace pattern these skills assume
 
-Each skill works on a single project folder. Together they work best on a **multi-project workspace**: one root folder with a short umbrella `CLAUDE.md`, one subfolder per project, and a shared memory hub that a small script symlinks into every project so a preference written once applies everywhere. `/newproject` builds the spokes, `/takenotes` routes memory to hub or project, `/putdown` + `/pickup` carry sessions across the gaps, and `/grill-me` makes you defend a plan before any of that starts.
+Each skill works on a single project folder. Together they work best on a **multi-project workspace**: one root folder with a short umbrella `CLAUDE.md`, one subfolder per project, and a shared memory hub that a small script symlinks into every project so a preference written once applies everywhere. `/newproject` builds the spokes, `/takenotes` routes memory to hub or project, `/putdown` + `/pickup` carry sessions across the gaps, and `/grill-me` (installed separately, see INSTALL.md) makes you defend a plan before any of that starts.
 
 The [`workspace/`](workspace/) folder has the whole thing: a copy-and-paste setup guide, the `fanout-memory.sh` helper that `/newproject` and `/takenotes` look for, an umbrella `CLAUDE.md` template, a test script that proves the helper works on your machine, and [`STACK.md`](workspace/STACK.md), the rest of the tool stack in install order.
 
@@ -51,7 +51,7 @@ cp -r charles-claude-skills/skills/session-continuity/{putdown,pickup} ~/.claude
 # Optional third — memory harvesting; /putdown will chain to it if present:
 cp -r charles-claude-skills/skills/session-continuity/takenotes ~/.claude/skills/
 # Standalone, opt-in:
-cp -r charles-claude-skills/skills/{newproject,skill-dict} ~/.claude/skills/
+cp -r charles-claude-skills/skills/{newproject,skill-dict,grill-me} ~/.claude/skills/
 ```
 
 Then **close your Claude Code window and open a fresh one** so the new skills register. (`Cmd+Shift+P → Developer: Reload Window` does NOT free Claude Code's context memory — only a fresh window does.)

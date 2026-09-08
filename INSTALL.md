@@ -1,6 +1,6 @@
 # Install
 
-Install any combination of the five skills in this repo. They're all standalone except for the **session-continuity pair** (`/putdown` + `/pickup`), which must always be installed together. `/takenotes` lives in the same folder as that pair but is independent — install it with them, without them, or add it later.
+Install any combination of the six skills in this repo. They're all standalone except for the **session-continuity pair** (`/putdown` + `/pickup`), which must always be installed together. `/takenotes` lives in the same folder as that pair but is independent — install it with them, without them, or add it later.
 
 ## Prerequisite
 
@@ -53,7 +53,7 @@ cp -r charles-claude-skills/skills/newproject ~/.claude/skills/
 
 ```bash
 # In ~/.zshrc or ~/.bashrc:
-export WORKSPACE_DIR=~/projects
+export WORKSPACE_DIR=~/CLAUDE   # any path works; the workspace guide uses ~/CLAUDE
 ```
 
 Optional: if `$WORKSPACE_DIR/scripts/fanout-memory.sh` exists, the skill uses it to symlink universal memory files into each new project. That helper ships in this repo; see section 4. Without it, the skill falls back to plain `mkdir`.
@@ -76,7 +76,7 @@ If you keep more than one project, the [`workspace/`](workspace/) folder turns t
 mkdir -p ~/CLAUDE/scripts
 cp charles-claude-skills/workspace/fanout-memory.sh ~/CLAUDE/scripts/ && chmod +x ~/CLAUDE/scripts/fanout-memory.sh
 [ -f ~/CLAUDE/CLAUDE.md ] || cp charles-claude-skills/workspace/CLAUDE.md.template ~/CLAUDE/CLAUDE.md
-export WORKSPACE_DIR=~/CLAUDE   # and add the same line to your shell rc
+export WORKSPACE_DIR=~/CLAUDE   # use the SAME value you set in section 2; this guide's examples use ~/CLAUDE
 ```
 
 Prove the helper works on your machine before relying on it:

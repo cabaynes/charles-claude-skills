@@ -5,7 +5,8 @@
 # Source of truth: ~/.claude/skills/<name>/  (Charles's local, daily-use copies)
 # Target:          this repo's skills/<name>/  (sanitized public snapshot)
 #
-# Copies pickup, skill-dict, and grill-me. This script does NOT copy three skills — each has a parameterized public fork that is
+# Copies pickup, skill-dict, and grill-me. The other three are NOT copied — each has a
+# parameterized public fork that is
 # maintained BY HAND, because the local version encodes setup this repo's users don't have:
 #
 #   /newproject  — local version hardcodes one workspace layout; public version is parameterized.

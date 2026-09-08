@@ -21,10 +21,16 @@ set -euo pipefail
 
 WORKSPACE_DIR="${WORKSPACE_DIR:-$HOME/CLAUDE}"
 WORKSPACE_DIR="${WORKSPACE_DIR/#\~/$HOME}"
+WORKSPACE_DIR="${WORKSPACE_DIR%/}"
 HUB_SLUG="$(printf '%s' "$WORKSPACE_DIR" | tr '/' '-')"
 PROJECTS_BASE="$HOME/.claude/projects"
 HUB_MEMORY="$PROJECTS_BASE/$HUB_SLUG/memory"
 SUBPROJECT_PREFIX="${HUB_SLUG}-"
+
+if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
+  sed -n '/^# fanout-memory.sh/,/^$/p' "$0" | sed -E 's/^# ?//'
+  exit 0
+fi
 
 mkdir -p "$HUB_MEMORY"
 
@@ -38,6 +44,7 @@ done
 if [ "${#universal_files[@]}" -eq 0 ]; then
   echo "No universal memory files (feedback_*.md / user_*.md) in $HUB_MEMORY yet." >&2
   echo "Write one there first (user_profile.md is the usual starting point), then re-run." >&2
+  echo "If that path is not what you expected, check \$WORKSPACE_DIR (currently: $WORKSPACE_DIR)." >&2
   exit 1
 fi
 
@@ -73,6 +80,10 @@ fanout_one() {
     if [ -L "$target" ] && [ "$(readlink "$target")" = "$src" ]; then
       continue
     fi
+    if [ -e "$target" ] && [ ! -L "$target" ]; then
+      echo "    ! $filename exists here as a real file — skipping (move or rename it to fan out)"
+      continue
+    fi
     ln -sf "$src" "$target"
     linked_count=$((linked_count + 1))
     echo "    + $filename"
@@ -93,7 +104,7 @@ fanout_one() {
   else
     local missing=()
     for filename in "${universal_files[@]}"; do
-      if ! grep -q "($filename)" "$index"; then
+      if ! grep -qF -- "($filename)" "$index"; then
         missing+=("$filename")
       fi
     done
@@ -159,9 +170,6 @@ case "${1:-}" in
     done
     echo ""
     echo "Done."
-    ;;
-  --help|-h)
-    sed -n '/^# fanout-memory.sh/,/^$/p' "$0" | sed 's/^# \?//'
     ;;
   *)
     fanout_one "$1"
