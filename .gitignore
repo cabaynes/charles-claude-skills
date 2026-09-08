@@ -8,3 +8,6 @@
 grill-me-sessions/
 .idea/
 .vscode/*.local.json
+
+# Subagent-driven-development scratch (ledger, briefs, review packages) — never published
+.superpowers/
