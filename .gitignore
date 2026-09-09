@@ -11,3 +11,9 @@ grill-me-sessions/
 
 # Subagent-driven-development scratch (ledger, briefs, review packages) — never published
 .superpowers/
+
+# --- workspace baseline (managed by scripts/fanout-gitignore.sh) ---
+.claude/worktrees/
+.playwright-cli/
+.playwright-mcp/
+# --- end workspace baseline ---
