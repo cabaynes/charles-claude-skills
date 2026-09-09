@@ -81,8 +81,8 @@ Keep the result — you'll echo a one-line version in Step 5.
 Save to `~/.claude/putdowns/<project-slug>/<YYYY-MM-DD-HHMM>.md`. Create the per-project subfolder if it doesn't exist (`mkdir -p`).
 
 **Determining `<project-slug>`:**
-- If the user passed an argument (e.g. `/putdown jessica`), use that as the slug. This is the right choice when the CWD is a parent folder containing multiple projects (e.g. CWD is `CLAUDE` but the work is about jessica).
-- Otherwise, use the basename of the CWD (e.g. `jessica`, `BookmarkSync`).
+- If the user passed an argument (e.g. `/putdown my-app`), use that as the slug. This is the right choice when the CWD is a parent folder containing multiple projects (e.g. CWD is `CLAUDE` but the work is about my-app).
+- Otherwise, use the basename of the CWD (e.g. `my-app`, `RecipeBox`).
 - If the CWD basename looks like a multi-project parent (e.g. `CLAUDE`) and no argument was given, **ask the user** which project this putdown is for before saving — don't dump it under the parent folder name.
 
 Use this structure exactly — the next agent will be reading it cold:
@@ -154,7 +154,7 @@ Keep your final reply tight — the handoff document does the heavy lifting; don
 
 ## Notes on judgment
 
-- **Be specific, not generic.** "Continue working on the auth flow" is useless. "In `<workspace-root>/jessica/pipeline/generate.py:142`, the `--seed` flag isn't being passed to ComfyUI; need to add it to the request payload" is useful.
+- **Be specific, not generic.** "Continue working on the auth flow" is useless. "In `<workspace-root>/my-app/src/export.py:142`, the `--seed` flag isn't being passed to the renderer; need to add it to the request payload" is useful.
 - **Include failure context.** If you spent 20 minutes ruling something out, write it down so the next agent doesn't repeat it.
 - **Don't overwrite prior putdowns.** Each is timestamped; keep history.
 - **If the project is brand new and there's nothing meaningful to hand off, say so** rather than padding with filler.

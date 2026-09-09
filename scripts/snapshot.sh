@@ -97,11 +97,12 @@ done
 # caught by the name rules. Those pronouns almost always travel with such drift, so
 # fail loudly on a leaked name or pronoun — drift gets fixed at the source, never
 # shipped silently. (The content has no legitimate third-person pronouns; if a future
-# skill needs one referring to someone else, narrow this check then.)
+# skill needs one referring to someone else, narrow this check then.) The same check fails on
+# the maintainer's private project names, so worked examples stay generic (my-app, RecipeBox).
 echo "  • checking for sanitization residue"
 RESIDUE=0
 for f in "${SANITIZE_TARGETS[@]}"; do
-  if grep -nEi "\bCharles\b|\bhe's\b|\bhis\b|\bhim\b|\bhe\b" "$f"; then
+  if grep -nEi "\bCharles\b|\bhe's\b|\bhis\b|\bhim\b|\bhe\b|jessica|BookmarkSync|\blotto\b|\bSBG\b|FPSpec|\bWedding\b" "$f"; then
     echo "    ↑ residue in ${f#${REPO_DIR}/}" >&2
     RESIDUE=1
   fi

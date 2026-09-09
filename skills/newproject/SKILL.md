@@ -108,7 +108,7 @@ _(Links to related repos, docs, dashboards, vendor accounts.)_
 _(Track ongoing decisions and context here.)_
 ```
 
-Capitalize the project name appropriately (e.g., `tax-tracking` → `Tax Tracking`, `BookmarkSync` → `BookmarkSync`). Use sensible title-casing.
+Capitalize the project name appropriately (e.g., `tax-tracking` → `Tax Tracking`, `RecipeBox` → `RecipeBox`). Use sensible title-casing.
 
 ## Step 7 — Set up the memory directory
 
