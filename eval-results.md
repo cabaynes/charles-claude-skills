@@ -14,8 +14,9 @@
 | `/newproject` | 9/10 (90%) → 10/10 expected | 10/10 (100%) | ✅ PASS (revised) | Description rewritten with explicit "do NOT" guards; added `argument-hint` + `allowed-tools` |
 | `/skill-dict` | 10/10 (100%) | 10/10 (100%) | ✅ PASS | Description tightened; subcommand bodies extracted to `references/`; body reduced from ~1500 → 440 words |
 | `/takenotes` | 10/10 (100%) | 10/10 (100%) | ✅ PASS | Added + evaluated 2026-08-03. Also validated behaviourally against a poisoned-memory sandbox (below) |
+| `/grill-me` | 10/10 (100%) | 10/10 (100%) | ✅ PASS | Added + evaluated 2026-09-08 (LLM-as-judge variant); one description revision added the resume-a-session trigger (9/10 → 10/10 recall); frontmatter brought to standard (`argument-hint`, `allowed-tools`) |
 
-**All five skills pass the ≥80% threshold on both precision and recall.**
+**All six skills pass the ≥80% threshold on both precision and recall.**
 
 ---
 
@@ -161,6 +162,41 @@ multi-sample average, so a genuinely marginal query could land either way on a r
 behavioural fixes from round 2 were not themselves re-tested — the reason to stop was that defect
 severity had fallen from *writes to filesystem root* to *report formatting*, not that the skill was
 proven clean.
+
+## `/grill-me` — trigger benchmark (2026-09-08) — 100% / 100%
+
+Run with the LLM-as-judge variant described under "How to re-run the eval" below. Judge saw only the
+skill description and 20 shuffled, unlabelled queries — 10 realistic should-trigger, 10 adversarial
+should-not-trigger.
+
+**Recall 10/10 · Precision 10/10.**
+
+Round 1 scored 9/10 recall, 10/10 precision: "resume our grill session on db-migration, I want to
+pick up the open threads" was judged NO_TRIGGER because the description never mentioned resuming,
+although the skill body supports it. One revision added ", or asks to resume an earlier grill
+session" to the trigger sentence; round 2 with a fresh judge scored 10/10 on both.
+
+The adversarial half targeted the three ways this skill could over-fire: the literal word "grill" in
+a non-plan context, interrogation-shaped requests with no plan behind them, and requests that *name*
+a plan but ask for execution.
+
+| Adversarial query | Result | Why it's a trap |
+|---|---|---|
+| "how long do I grill chicken thighs per side..." | NO_TRIGGER ✓ | Literal keyword, zero plan. |
+| "quiz me on Spanish vocabulary for twenty minutes" | NO_TRIGGER ✓ | Interrogation format without a plan to stress-test. |
+| "write the migration plan for moving us to PostgreSQL" | NO_TRIGGER ✓ | Names a plan; asks for execution, which the skill forbids itself. |
+| "implement the roadmap item: add dark mode..." | NO_TRIGGER ✓ | Implementation task. |
+| "review this pull request for bugs before I merge" | NO_TRIGGER ✓ | Code review, explicitly excluded. |
+| "why is this test failing? it passed yesterday" | NO_TRIGGER ✓ | Debugging, explicitly excluded. |
+| "refactor this function so it's easier to read" | NO_TRIGGER ✓ | Refactoring, explicitly excluded. |
+| "proofread my cover letter for typos..." | NO_TRIGGER ✓ | Feedback on an existing document, not interrogation of a plan. |
+| "what do you think of Stripe versus Braintree..." | NO_TRIGGER ✓ | Opinion request; no plan of the user's to defend. |
+| "summarize the risks in this vendor contract" | NO_TRIGGER ✓ | Analysis of a document, not a dialogue about the user's plan. |
+
+Should-trigger queries covered the literal phrases ("grill me", "stress test my plan", "poke holes in
+this"), synonyms the description does not name ("interrogate that decision", "play devil's advocate",
+"pressure-test", "challenge every assumption"), three non-software domains (a lease, a thesis, a
+novel), and resuming a named session.
 
 ## How to re-run the eval
 

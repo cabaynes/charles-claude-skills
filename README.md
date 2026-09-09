@@ -26,6 +26,21 @@ The split is by lifetime: a putdown is a note to your next session and goes stal
 |---|---|---|
 | `/newproject` | Bootstrap a configurable workspace project (idempotent) | [skills/newproject/README.md](skills/newproject/README.md) |
 | `/skill-dict` | Manage a personal catalog of installed Claude Code skills | [skills/skill-dict/README.md](skills/skill-dict/README.md) |
+| `/grill-me` | Interrogate a plan, design, or idea before you commit; it asks, it never builds | [skills/grill-me/README.md](skills/grill-me/README.md) |
+
+## The workspace pattern these skills assume
+
+Each skill works on a single project folder. Together they work best on a **multi-project workspace**: one root folder with a short umbrella `CLAUDE.md`, one subfolder per project, and a shared memory hub that a small script symlinks into every project so a preference written once applies everywhere. `/newproject` builds the spokes, `/takenotes` routes memory to hub or project, `/putdown` + `/pickup` carry sessions across the gaps, and `/grill-me` (installed separately, see INSTALL.md) makes you defend a plan before any of that starts.
+
+The [`workspace/`](workspace/) folder has the whole thing: a copy-and-paste setup guide, the `fanout-memory.sh` helper that `/newproject` and `/takenotes` look for, an umbrella `CLAUDE.md` template, a test script that proves the helper works on your machine, and [`STACK.md`](workspace/STACK.md), the rest of the tool stack in install order.
+
+**Setting someone else up, or letting Claude do it?** Point Claude at the guide and say "set me up like this":
+
+```
+https://raw.githubusercontent.com/cabaynes/charles-claude-skills/main/workspace/README.md
+```
+
+The guide opens with a runbook section written for a Claude agent acting on a person's behalf.
 
 ## Install (quick)
 
@@ -36,7 +51,7 @@ cp -r charles-claude-skills/skills/session-continuity/{putdown,pickup} ~/.claude
 # Optional third — memory harvesting; /putdown will chain to it if present:
 cp -r charles-claude-skills/skills/session-continuity/takenotes ~/.claude/skills/
 # Standalone, opt-in:
-cp -r charles-claude-skills/skills/{newproject,skill-dict} ~/.claude/skills/
+cp -r charles-claude-skills/skills/{newproject,skill-dict,grill-me} ~/.claude/skills/
 ```
 
 Then **close your Claude Code window and open a fresh one** so the new skills register. (`Cmd+Shift+P → Developer: Reload Window` does NOT free Claude Code's context memory — only a fresh window does.)
@@ -60,6 +75,7 @@ These aren't just "skills I wrote" — each was scored against an 18-rule rubric
 | `/newproject` | 10/10 (post-revision) | 10/10 | 2026-05-13 |
 | `/skill-dict` | 10/10 | 10/10 | 2026-05-13 |
 | `/takenotes` | 10/10 | 10/10 | 2026-08-03 |
+| `/grill-me` | 10/10 (post-revision) | 10/10 | 2026-09-08 |
 
 `/takenotes` also went through a second, different kind of validation: subagents **executed** it against a sandbox seeded with a deliberately poisoned memory, over two rounds that found and closed ten defects. Trigger accuracy measures whether a skill *fires at the right time*; that measures whether it *does the right thing once it fires*. Both are in [eval-results.md](eval-results.md).
 

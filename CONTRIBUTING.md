@@ -9,6 +9,8 @@ PRs are welcome. These skills were authored for a specific personal workflow but
 - Tightening of body content (less words, same clarity)
 - New troubleshooting entries in `INSTALL.md`
 - Compatibility fixes for non-macOS platforms (`sed -i ''` is BSD-specific, etc.)
+- Portability fixes to `workspace/fanout-memory.sh` (keep `workspace/test-fanout.sh` passing; add a scenario if you fix a bug it didn't catch)
+- Corrections to `workspace/STACK.md` when a Claude Code release changes an install command
 
 ## What's unlikely to be merged
 
@@ -37,7 +39,7 @@ PRs are welcome. These skills were authored for a specific personal workflow but
 ## Reporting bugs
 
 Open an issue with:
-- Which skill (`/putdown`, `/pickup`, `/newproject`, `/skill-dict`)
+- Which skill (`/putdown`, `/pickup`, `/takenotes`, `/newproject`, `/skill-dict`, `/grill-me`) or `workspace/fanout-memory.sh`
 - Claude Code version (`/version` in Claude Code)
 - macOS / Linux / WSL
 - A minimal reproduction (the exact query you typed, what you expected, what happened)

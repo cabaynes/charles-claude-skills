@@ -5,7 +5,8 @@
 # Source of truth: ~/.claude/skills/<name>/  (Charles's local, daily-use copies)
 # Target:          this repo's skills/<name>/  (sanitized public snapshot)
 #
-# This script does NOT copy three skills — each has a parameterized public fork that is
+# Copies pickup, skill-dict, and grill-me. The other three are NOT copied — each has a
+# parameterized public fork that is
 # maintained BY HAND, because the local version encodes setup this repo's users don't have:
 #
 #   /newproject  — local version hardcodes one workspace layout; public version is parameterized.
@@ -44,6 +45,11 @@ mkdir -p "${PUBLIC_SKILLS}/skill-dict/references"
 cp "${LOCAL_SKILLS}/skill-dict/SKILL.md" "${PUBLIC_SKILLS}/skill-dict/SKILL.md"
 cp "${LOCAL_SKILLS}/skill-dict/references/"*.md "${PUBLIC_SKILLS}/skill-dict/references/"
 
+# --- 2b. Copy grill-me (local canonical is a symlink into ~/CLAUDE/skills-library; cp follows it) ---
+echo "  • copying grill-me"
+mkdir -p "${PUBLIC_SKILLS}/grill-me"
+cp "${LOCAL_SKILLS}/grill-me/SKILL.md" "${PUBLIC_SKILLS}/grill-me/SKILL.md"
+
 # --- 3. Apply sanitization to every copied *.md file ---
 # Order matters: do longer/more-specific patterns BEFORE shorter ones.
 echo "  • sanitizing personal paths and names"
@@ -56,6 +62,7 @@ SANITIZE_TARGETS=(
   "${PUBLIC_SKILLS}/skill-dict/references/sync.md"
   "${PUBLIC_SKILLS}/skill-dict/references/check-updates.md"
   "${PUBLIC_SKILLS}/skill-dict/references/add.md"
+  "${PUBLIC_SKILLS}/grill-me/SKILL.md"
 )
 
 for f in "${SANITIZE_TARGETS[@]}"; do

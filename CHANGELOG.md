@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented here. Format roughly follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.7.0] — 2026-09-08
+
+### Added
+
+- **`workspace/` — the multi-project layout the skills were built for, now shippable.** Until now `/newproject` and `/takenotes` both *looked for* a memory fan-out helper that this repo never provided ("a user-supplied helper"). The folder closes that gap: `fanout-memory.sh` reads `$WORKSPACE_DIR`, derives the workspace's memory hub from it, symlinks every `user_*.md` and `feedback_*.md` from the hub into each project's memory directory, and appends the matching `MEMORY.md` index lines (idempotently; `project_*` and `reference_*` files are deliberately left local). `test-fanout.sh` proves it on the current machine in eight scenarios against a throwaway `HOME`. `CLAUDE.md.template` is an umbrella file with the `## Subprojects` heading `/newproject` appends to and five house rules. `README.md` is a copy-and-paste walkthrough that opens with a runbook section for a Claude agent setting someone else up: Terminal install, a hub-bootstrap prompt, a user-profile interview prompt, first project, optional global rules, optional web-session skills, the daily rhythm, and the gotchas.
+- **`workspace/STACK.md` — the rest of the stack in install order.** Layer 2 (official plugins: superpowers, frontend-design, skill-creator), Layer 3 (optional: context-mode, Playwright MCP with its own browser profile, claude.ai connectors), and Layer 4 (patterns not to copy verbatim: hard-blocking hooks, a CLAUDE.md size reminder, language servers). Each entry has the exact `claude` CLI command and the reason it earns its place; versions pinned as of 2026-09-08.
+- **`/grill-me`** — sixth published skill. A structured interrogator for plans, designs, and ideas that asks and never builds; keeps a resumable session file. Passed the 20-query trigger benchmark at 10/10 recall, 10/10 precision (LLM-as-judge variant) on 2026-09-08, after one description revision that added the resume-a-session trigger; frontmatter brought to the repo standard with `argument-hint` and `allowed-tools`. `snapshot.sh` now copies it from the local canonical source alongside `pickup` and `skill-dict`.
+
+### Changed
+
+- `/newproject` README and SKILL body, `INSTALL.md`, and the root `README.md` now point at the shipped helper instead of describing it as something you would write yourself. The root README also says where to point a Claude agent. No existing skill description changed, so prior trigger-accuracy numbers in [eval-results.md](eval-results.md) are unaffected.
+- `INSTALL.md`'s uninstall line now includes `/takenotes` and `/grill-me`; 0.5.0 added `/takenotes` to the install steps but not the removal.
+- `MAINTAINING.md`'s canonical-source table no longer claims `snapshot.sh` refreshes `/putdown` and `/takenotes`; both have been hand-maintained forks since 0.5.0 and the script's own header says so.
+
+### Notes
+
+- The helper depends on two observed Claude Code behaviors (memory at `~/.claude/projects/<slug>/memory/`, slug = absolute path with `/` → `-`). The guide says so plainly and names the two lines to change if a release moves them.
+- `STACK.md` install commands are verified against the `claude` CLI on the release date; re-verify when Claude Code updates.
+
 ## [0.6.0] — 2026-08-22
 
 ### Added

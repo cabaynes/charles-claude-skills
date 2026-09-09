@@ -1,6 +1,6 @@
 # Install
 
-Install any combination of the five skills in this repo. They're all standalone except for the **session-continuity pair** (`/putdown` + `/pickup`), which must always be installed together. `/takenotes` lives in the same folder as that pair but is independent — install it with them, without them, or add it later.
+Install any combination of the six skills in this repo. They're all standalone except for the **session-continuity pair** (`/putdown` + `/pickup`), which must always be installed together. `/takenotes` lives in the same folder as that pair but is independent — install it with them, without them, or add it later.
 
 ## Prerequisite
 
@@ -53,10 +53,10 @@ cp -r charles-claude-skills/skills/newproject ~/.claude/skills/
 
 ```bash
 # In ~/.zshrc or ~/.bashrc:
-export WORKSPACE_DIR=~/projects
+export WORKSPACE_DIR=~/CLAUDE   # any path works; the workspace guide uses ~/CLAUDE
 ```
 
-Optional: if you keep a memory-fan-out script at `$WORKSPACE_DIR/scripts/fanout-memory.sh` (a user-supplied helper that symlinks universal memory files into each project), the skill will use it. Otherwise it falls back to plain `mkdir`.
+Optional: if `$WORKSPACE_DIR/scripts/fanout-memory.sh` exists, the skill uses it to symlink universal memory files into each new project. That helper ships in this repo; see section 4. Without it, the skill falls back to plain `mkdir`.
 
 ## 3. Optional: `/skill-dict`
 
@@ -67,6 +67,31 @@ cp -r charles-claude-skills/skills/skill-dict ~/.claude/skills/
 ```
 
 By default, the skill looks for the catalog at `~/skills-library/`. If you want a different path, edit `~/.claude/skills/skill-dict/SKILL.md` and replace the `~/skills-library/` references with your preferred location.
+
+## 4. Optional: the workspace pattern (shared memory across projects)
+
+If you keep more than one project, the [`workspace/`](workspace/) folder turns the skills into one system: an umbrella `CLAUDE.md` at the root, and a memory hub whose universal files (`user_*.md`, `feedback_*.md`) are symlinked into every project. Full walkthrough with copy-and-paste prompts in [workspace/README.md](workspace/README.md); the wider tool stack in [workspace/STACK.md](workspace/STACK.md). The two files it installs:
+
+```bash
+mkdir -p ~/CLAUDE/scripts
+cp charles-claude-skills/workspace/fanout-memory.sh ~/CLAUDE/scripts/ && chmod +x ~/CLAUDE/scripts/fanout-memory.sh
+[ -f ~/CLAUDE/CLAUDE.md ] || cp charles-claude-skills/workspace/CLAUDE.md.template ~/CLAUDE/CLAUDE.md
+export WORKSPACE_DIR=~/CLAUDE   # use the SAME value you set in section 2; this guide's examples use ~/CLAUDE
+```
+
+Prove the helper works on your machine before relying on it:
+
+```bash
+bash charles-claude-skills/workspace/test-fanout.sh
+```
+
+## 5. Optional: `/grill-me`
+
+Interrogates a plan or idea instead of building it. Sessions are written to `grill-me-sessions/` in the current directory; add that folder to your project's `.gitignore` if you do not want planning notes committed.
+
+```bash
+cp -r charles-claude-skills/skills/grill-me ~/.claude/skills/
+```
 
 ## Symlink vs. copy
 
@@ -115,7 +140,8 @@ Export it in your shell rc so it persists across sessions (see step 2 above).
 ## Uninstall
 
 ```bash
-rm -rf ~/.claude/skills/{putdown,pickup,newproject,skill-dict}
+rm -rf ~/.claude/skills/{putdown,pickup,takenotes,newproject,skill-dict,grill-me}
+rm -f ~/CLAUDE/scripts/fanout-memory.sh   # only if you installed the workspace pattern; leaves your memory symlinks in place
 ```
 
 Restart Claude Code in a fresh window.
