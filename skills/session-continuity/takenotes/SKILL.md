@@ -1,6 +1,6 @@
 ---
 name: takenotes
-description: Saves durable knowledge into permanent storage — typed memory, CLAUDE.md, or a docs/ file — and corrects anything already stored that has gone stale. Handles both a single fact and a whole-session harvest. Use when the user says "takenotes", asks you to remember or record something, asks you to save what was learned this session, or asks you to update memory and CLAUDE.md after solving a problem, making a decision, or reaching a natural checkpoint. Also invoked by /putdown. Do NOT use for transcribing a meeting, video, or article, or for capturing ephemeral session state (that is /putdown).
+description: Saves durable knowledge into permanent storage — typed memory, CLAUDE.md, or a docs/ file — and corrects anything already stored that has gone stale. Handles both a single fact and a whole-session harvest. Use when the user says "takenotes", asks you to remember or record something, asks you to save what was learned this session, or asks you to update memory and CLAUDE.md after solving a problem, making a decision, working out how a tool or permission actually behaves, hitting a roadblock, or reaching a natural checkpoint. Also invoked by /putdown. Do NOT use for transcribing a meeting, video, or article, or for capturing ephemeral session state (that is /putdown).
 argument-hint: "[topic-to-focus-on]"
 allowed-tools:
   - Read
@@ -32,7 +32,7 @@ Decide which of these you're doing. Getting this wrong makes the skill annoying 
 | Session checkpoint — solved a problem, made a decision, finished a feature, asked to "save what we learned" | Full harvest. Continue to Step 1. |
 | A topic argument was passed (`/takenotes auth flow`) | Full harvest, but scope Steps 2–4 to that topic only. |
 | Called from `/putdown` | Full harvest. Continue to Step 1. |
-| Nothing durable happened (pure Q&A, reading code, no decisions) | Say so plainly in one line and stop. Do not manufacture findings to look productive. |
+| Nothing durable happened (pure Q&A, reading code, no decisions) | Say so plainly in one line and stop. Do not manufacture findings to look productive. **But a session spent fighting tooling, access, or permissions is never "nothing durable"** — that is Step 2a's whole subject, even when no code changed. |
 
 ### Single-fact path
 
@@ -142,6 +142,8 @@ Look for:
 - **Decisions with non-obvious rationale.** Not what was chosen — *why*, and what was rejected.
 - **Dead ends.** What was tried that didn't work, and the reason. This is the highest-value and most
   frequently lost category: the difference between a future session losing 20 minutes or zero.
+- **Operational findings.** What you now know about the tools, access, and environment that you
+  didn't know when the session started. **Step 2a is a required pass — do not skip it.**
 - **Corrections.** If the user pushed back on your approach, that's `feedback`.
 - **Facts about the user** — role, expertise, tools, what they're building. That's `user`.
 - **Project state** — what works, what's deferred, what's blocked, what's ruled out. That's `project`.
@@ -157,6 +159,52 @@ Deliberately exclude:
   *isn't* recoverable from the repo.
 - Secrets, credentials, tokens, keys — **never**, in any file, in any form. If a value came from a
   credential file, record only that it exists and where, never its contents.
+
+### Step 2a — Operational findings (required pass)
+
+Everything above is about the *work*. This pass is about **operating the environment** — what you
+learned about tools, access, and this machine. It is the category most reliably lost, because it
+doesn't feel like a finding: by the time you write the summary the tool is working, and the hour
+spent getting there has stopped feeling like knowledge.
+
+Answer this question out loud, every run:
+
+> **What do I know about operating in this environment now that I didn't know when this session
+> started — about which tool to reach for, what it can't do, what it needs, or where its settings
+> live?**
+
+Five shapes count. All five are durable, and the last three are the ones that go missing:
+
+| Shape | What it sounds like |
+|---|---|
+| **Capability limit** — a tool can't do something you assumed it could | the connected integration is provisioned read-only; every mutating call is gated off, so writes go through the REST API |
+| **Access path** — where a permission, credential, or setting actually lives | the write scope is granted in the vendor's partner console, not the account settings, and the app must be reinstalled to mint a token |
+| **The approach that worked** — what you'd reach for first next time, and what you'd skip | a multi-megabyte export goes through a sandboxed query, not a full read into the conversation |
+| **The invocation that works** — the exact flag, arg, or sequence that made it go | the headed browser run needs an explicit engine flag; downloads need the new headless mode |
+| **Blocked path** — something that cannot be done right now, and what would unblock it | the device firmware exposes no local stream; revisit only when the vendor ships the next version — don't re-derive this |
+
+**A success counts.** Every other category in Step 2 is a failure, a decision, or a static fact, so
+a technique that simply *worked* has no obvious home and gets dropped. It has a home: here.
+
+#### Do not talk yourself out of it
+
+Testing found agents discard this category at a very high rate, always with the same move: deciding
+that because the tool behaved as designed, nothing was learned. Counters:
+
+| Thought | Reality |
+|---|---|
+| "The tool behaved as documented — nothing was discovered" | You discovered *which* tool, usually after trying a different one first. That is the finding. |
+| "That's standard practice / a standing convention" | Standing conventions don't say which one applies to this case. The specific case is the value. |
+| "It's not project-specific, so it's not a project fact" | Correct — which makes it **shared**, not disposable. That's a routing answer, not a reason to drop it. |
+| "It would just restate guidance that already exists" | Then *update that memory* with the concrete case you proved. Confirming beats re-deriving. |
+| "Worth promoting only if it recurs on another project" | You are the recurrence. It already cost time once; the next session pays again to learn the same thing. |
+| "The narrative of how I found it is just session color" | Right — strip the narrative, keep the rule. Dropping the narrative is not a reason to drop the rule. |
+
+**Red flag:** if your "not stored" list explains why a tool discovery wasn't worth keeping, you are
+in this failure. Move it to the harvest.
+
+An honest "nothing operational this session" is a fine answer. A *missing* answer is how this
+category disappears — which is why Step 5 makes you state it either way.
 
 ---
 
@@ -240,6 +288,25 @@ that's how this machine is set up:
   memory that should have been shared is a small loss; a shared memory that should have been local
   pollutes every project.
 
+- *Operational findings (Step 2a) are scoped by what the fact is **about**, not by where you were
+  standing when you found it.* You always discover tooling facts inside some project; that says
+  nothing about where they apply. Run this test **before** falling back to unsure → local:
+
+  | The fact names… | Scope |
+  |---|---|
+  | your own toolchain — a CLI, shell, browser, MCP client, sandbox, OS path, or machine setting that travels with you into every project | **shared** |
+  | a **third-party product** — a vendor's API, dashboard, plan limits, rate limits, scopes, or console | **local**, even when the vendor is used by more than one project |
+  | this repo's own code, build, or conventions | **local** — and usually CLAUDE.md, not memory |
+
+  **The line is who owns the thing, not how reusable the fact feels.** A vendor's rate limit or
+  scope-grant path is durable, genuinely reusable, and still **local** — it's their product, it
+  changes on their schedule, and it has no claim on your other projects. "This might help on a
+  future project with the same vendor" is not a promotion ticket; that's what the vendor's own
+  project memory is for. Promote a vendor fact only if the user says they want it everywhere.
+
+  For a toolchain fact, "it applies everywhere" is the whole point: filed under one project it
+  silently fails to apply in the rest, which is exactly how this knowledge gets learned twice.
+
 If Step 1c found no symlinks, none of this applies — write everything local.
 
 ### 4b. CLAUDE.md — guarded
@@ -315,12 +382,20 @@ CLAUDE.md / docs
   ./CLAUDE.md  +3 lines (now 88) — added the sync entry point
   created      docs/webhook-signing.md (58 lines) — new spoke, new content; linked from CLAUDE.md
 
+Operational (Step 2a)
+  vendor integration is read-only → writes go via the REST API   [local]
+  headed browser runs need an explicit engine flag               [shared]
+
 Not stored
   mid-refactor state at receiver.py:142 — ephemeral, belongs in /putdown
 ```
 
 Then:
 
+- **The `Operational` block is required, not optional.** Print it every run. If there was genuinely
+  nothing, print `Operational (Step 2a)` with `none this session` under it. Omitting the block is
+  not the same as having nothing to put in it — a silent absence is exactly how tool knowledge gets
+  lost, and it's the one thing the user can't notice going missing.
 - **Flag shared-memory writes explicitly.** "This now applies to all your projects" is something the
   user must actually see.
 - **Do not commit.** Mid-session runs leave changes for `/putdown` to sweep, which keeps this skill
@@ -336,6 +411,9 @@ Then:
   entitlements first" is worth keeping forever.
 - **Dead ends are the highest-value thing you can write.** They're invisible in the code and
   unrecoverable from git. Write them down every time.
+- **The path that worked is worth as much as the dead end that didn't** — and it's dropped far more
+  often, because a working tool stops looking like a discovery the moment it works. "Reach for X,
+  not Y" saves the next session the same hour you just spent. Both halves belong in the record.
 - **Fewer, better memories.** Consolidating two overlapping memories into one correct memory beats
   adding a third.
 - **When a finding is real but its payload is missing, write the gap — never invent the values.** If
