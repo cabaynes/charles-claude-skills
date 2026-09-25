@@ -77,7 +77,7 @@ These aren't just "skills I wrote" — each was scored against an 18-rule rubric
 | `/takenotes` | 10/10 | 10/10 | 2026-08-03 |
 | `/grill-me` | 10/10 (post-revision) | 10/10 | 2026-09-08 |
 
-`/takenotes` also went through a second, different kind of validation: subagents **executed** it against a sandbox seeded with a deliberately poisoned memory, over two rounds that found and closed ten defects. Trigger accuracy measures whether a skill *fires at the right time*; that measures whether it *does the right thing once it fires*. Both are in [eval-results.md](eval-results.md).
+`/takenotes` also went through a second, different kind of validation: subagents **executed** it against a sandbox seeded with a deliberately poisoned memory, over two rounds that found and closed ten defects — and again on 2026-09-25 against a memory that claimed a fix nobody had ever run (0.8.0). Trigger accuracy measures whether a skill *fires at the right time*; that measures whether it *does the right thing once it fires*. Both are in [eval-results.md](eval-results.md).
 
 Full methodology, per-query verdicts, and revision rationale in [eval-results.md](eval-results.md).
 

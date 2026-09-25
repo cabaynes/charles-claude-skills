@@ -71,6 +71,26 @@ The four types: `user` (who you are — role, expertise, what you're building), 
 that change what the assistant does), `project` (state of this work — what's done, blocked, ruled
 out), `reference` (pointers to external things — URLs, dashboards, ticket IDs).
 
+**A claim that something is fixed, works, or is now X-aware carries its proof.** Add one line:
+
+```markdown
+**Verified by:** `<command>` → <what it printed / exit condition> (<date>)
+```
+
+The command is one a future session can paste; the result is what you actually saw. Write it only
+if **you ran that command this session**. If you didn't, write
+`**Verified by:** NOT RUN — <the command that would settle it>` — a claim marked unverified is
+honest; a bare "verified" that nobody ran is a claim with no expiry date, trusted long after it
+stops being true. A stored fix claim with no `Verified by:` line at all is the same thing as
+`NOT RUN`.
+
+What does **not** count as a run of the thing being claimed: `py_compile`, a linter, a successful
+`import`, or calling a helper in isolation. All four pass a `main()` whose body raises `NameError`
+on its first real line. The run is the **entry point** on real-shaped input — `--dry-run`, `--help`,
+`/dev/null` as the list, a one-item list, an input where every item is already done — whichever is
+cheapest and side-effect-free. Nearly every script has one; find it rather than declaring the
+script unrunnable.
+
 ---
 
 ## Step 1 — Locate the targets
@@ -221,16 +241,27 @@ section this session's work touched:
    record that it was once believed.
 3. **Did this session supersede it?** Update in place rather than creating a near-duplicate. Two
    memories saying almost the same thing is worse than one — the next agent won't know which to trust.
-4. **Do its concrete references still exist?** If a memory names a file, function, flag, script, or
-   path, verify it:
+4. **Do its claims still hold?** A path existing says nothing about whether the thing works. For
+   every memory that asserts a fix, a capability, or "works" **in an area this session touched**:
+   - It has a `**Verified by:**` command → **run it now.** This is the step that catches a fix that
+     silently stopped working, or never worked. A memory recorded "fixed" on one date and never
+     re-run since is the single most common false memory.
+   - It has no `Verified by:` line → this is the moment to add one. Run the cheapest real invocation
+     of the entry point (see the format block in Step 0) and record what it did. If you can't run
+     it, rewrite the claim as `NOT RUN`.
 
-```bash
-ls <path-referenced-in-memory> 2>/dev/null || echo "STALE: <path>"
-```
+   Bound it: fast, read-only, side-effect-free checks only (`--dry-run`, `--help`, an empty or
+   all-done input, a path test); only for memories relevant to what this session did. Never run
+   anything destructive, network-heavy, or slow as part of a reconcile — if the stored check is
+   expensive, say in Step 5 that it was not re-run and why.
 
-If the filesystem isn't authoritative here — you aren't in the repo, the tree isn't checked out, or
-the paths sit outside the project — this check proves nothing, because a correct current path and a
-deleted one both come back missing. Say so and reconcile from what the session established instead.
+   **A failed check is a finding.** The memory is wrong now: correct it, say so in Step 5, and treat
+   it as a recurrence (Step 4's gate below) — a claim that decayed once will decay again.
+
+   For plain path references (`ls <path> 2>/dev/null || echo "STALE: <path>"`): if the filesystem
+   isn't authoritative here — you aren't in the repo, the tree isn't checked out, the paths sit
+   outside the project — the check proves nothing, because a correct current path and a deleted one
+   both come back missing. Say so and reconcile from what the session established instead.
 
 5. **Is it now wrong enough to delete?** Deleting a false memory is a real improvement. Say what you
    deleted and why in Step 5 — never silently.
@@ -264,6 +295,28 @@ off VendorX 2026-08-03") is not stale — you are sweeping for the old fact stil
 ---
 
 ## Step 4 — Route and write
+
+**Before writing any memory about a failure, run the recurrence gate:**
+
+1. `grep -Rli "<the failure's distinctive term — the message it printed, the script name>" "$MEMDIR/memory/"`.
+   A hit — especially one that says it was fixed — means this is a **recurrence**. Do not add a
+   second account. Update that memory, say "RECURRED <date>; the <date> fix/note did not hold" in
+   its first lines, and treat the recurrence itself as evidence that a note is the wrong instrument.
+2. Ask: **does a future agent need to KNOW this, or will it REPEAT it?**
+   - *Know* — a tool choice, a flag, an access path, a vendor behaviour. A memory works: the next
+     agent reads it and chooses correctly. Write it.
+   - *Repeat* — a script that reports success while doing nothing, a check that returns a wrong
+     verdict, a state file that wedges its own retry, a fix that came back. A memory will not
+     prevent it; this session proves it, because the memory already existed. Write the memory
+     anyway (it still speeds diagnosis), **and** name the **code-level guard** — an assertion, a
+     raised exception, an age check, a refusal — and where it goes. `/takenotes` does not write code
+     unless asked: record the guard as the memory's first "How to apply" line, not buried under the
+     history, so the next session lands on it. When the trap has no code to guard (a manual step),
+     put a one-line gotcha in the project's CLAUDE.md instead — that file loads every session;
+     a memory loads only when someone opens it.
+
+   The principle: a rule that keeps getting violated has outgrown the note it lives in. For agent
+   behaviour the next rung is a hook; for code it is a guard in the code itself.
 
 ### 4a. Memory files
 
@@ -386,6 +439,12 @@ Operational (Step 2a)
   vendor integration is read-only → writes go via the REST API   [local]
   headed browser runs need an explicit engine flag               [shared]
 
+Claims (Step 3.4 / Verified by)
+  RAN      python3 scripts/sync.py --dry-run → "3 to push, 0 errors", exit 0   project_sync.md
+  RAN      python3 scripts/export.py /dev/null → NameError: 'paths'   ← memory said fixed 2026-09-09; corrected
+  NOT RUN  scripts/upload.py — no side-effect-free invocation; claim rewritten as NOT RUN
+  RECURRED staging orphan (2026-08-28 note) — guard named: age check in stage.py; gotcha added to CLAUDE.md
+
 Not stored
   mid-refactor state at receiver.py:142 — ephemeral, belongs in /putdown
 ```
@@ -396,6 +455,10 @@ Then:
   nothing, print `Operational (Step 2a)` with `none this session` under it. Omitting the block is
   not the same as having nothing to put in it — a silent absence is exactly how tool knowledge gets
   lost, and it's the one thing the user can't notice going missing.
+- **The `Claims` block is required whenever a fix, capability, or recurrence was in play.** Every
+  `Verified by:` you ran or wrote as `NOT RUN`, and every recurrence, gets one line. If the session
+  touched no such claim, print `Claims` with `none this session`. A claim you neither ran nor marked
+  is the exact thing this block exists to make visible.
 - **Flag shared-memory writes explicitly.** "This now applies to all your projects" is something the
   user must actually see.
 - **Do not commit.** Mid-session runs leave changes for `/putdown` to sweep, which keeps this skill

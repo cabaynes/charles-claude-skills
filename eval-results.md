@@ -198,6 +198,29 @@ this"), synonyms the description does not name ("interrogate that decision", "pl
 "pressure-test", "challenge every assumption"), three non-software domains (a lease, a thesis, a
 novel), and resuming a named session.
 
+## `/takenotes` — behavioural validation, round 2 (2026-09-25)
+
+The 2026-08-03 pass tested whether the reconcile step catches a memory that is *wrong*. This pass
+tested a memory that is *unverifiable*: "fixed", with no evidence and no way to re-check.
+
+Sandbox: a script whose `main()` raises `NameError` (passes `py_compile`), a memory calling it
+"verified functionally", a documented trap that had recurred, and a transcript whose last edit was
+"verified" via `py_compile` plus a helper call.
+
+| Arm | Reps | Corrected the false claim | Ran the entry point | Named a code guard for the recurrence |
+|---|---|---|---|---|
+| Prior skill (0.7.0) | 16 | 14/16 | 6/16 fully | 13/16 |
+| 0.8.0 | 6 | 6/6 | 6/6 | 6/6 (first "How to apply" line every time) |
+
+The two prior-skill failures shared one shape: never exercised the entry point, kept the stale
+"verified", and wrote *"verify with `py_compile` + inline helper call"* into a durable file. A first
+round was discarded because its transcript leaked the answer ("the script was never run") — 4/4
+passed and proved nothing.
+
+**Caveat:** the prior skill's failure rate was low (~12%), so 6/6 is weak evidence of a *rate*
+change. The strong evidence is structural: `**Verified by:**` lines, `RECURRED` markers, and the
+`Claims` report block appeared in 0/16 prior runs and 6/6 new ones.
+
 ## How to re-run the eval
 
 If you change a description (yours or upstream), re-run the eval to confirm you haven't regressed:

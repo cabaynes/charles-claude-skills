@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented here. Format roughly follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.8.0] — 2026-09-25
+
+### Changed
+
+- **`/takenotes` — fix claims now carry their proof, and get re-checked.** Prompted by a real
+  failure: a memory recorded a script as "fixed, verified functionally" on one date; the script had a
+  missing `import` and raised `NameError` on its first real call for 16 days, while `py_compile` kept
+  passing and every session trusted the note. Three separately documented bugs recurred verbatim in the
+  same project. The skill captured *claims* but no *evidence*, and nothing ever re-checked a claim.
+  Four edits, no new top-level step (+62 lines):
+  - **Step 0 memory format** — any memory asserting a fix, a capability, or "now works" carries a
+    `**Verified by:** <command> → <result>` line, written only if that command was run this session;
+    otherwise `NOT RUN — <what would settle it>`. Spells out what is *not* a run: `py_compile`, a
+    linter, a successful `import`, a helper called in isolation. The run is the entry point on
+    real-shaped input (`--dry-run`, `--help`, `/dev/null`, a one-item list).
+  - **Step 3 item 4** — "do its paths exist?" becomes "do its claims still hold?": re-run stored
+    `Verified by` commands for memories in areas the session touched, add one where missing, bounded to
+    fast side-effect-free checks. A failed check is a finding.
+  - **Step 4 recurrence gate** — grep memory for the failure's distinctive term before writing; a hit
+    is a recurrence, marked `RECURRED <date>` in the memory's first lines rather than stacked as a second
+    account. Then *know vs repeat*: a bug an agent will repeat regardless of knowing gets a named
+    code-level guard as the memory's first "How to apply" line (or a CLAUDE.md gotcha when there is no
+    code to guard).
+  - **Step 5** — a required `Claims` block (`RAN` / `NOT RUN` / `RECURRED` lines), so an unmarked
+    claim is visible by its absence, the same way the `Operational` block works.
+- Tested with subagents against a sandbox reproducing the failure (planted `NameError` that passes
+  `py_compile`, a memory claiming it verified, a documented recurring trap). 16-rep baseline on the
+  prior skill caught the false claim 14/16; the two failures shared one shape (never ran the entry
+  point, kept the stale claim, wrote "verify with `py_compile` + helper call" into a durable file).
+  6/6 treatment reps ran the entry point, wrote `Verified by` lines, flagged the recurrence and named
+  a guard first. Details in [eval-results.md](eval-results.md).
+- Description unchanged, so prior trigger-accuracy numbers are unaffected.
+
 ## [0.7.0] — 2026-09-08
 
 ### Added
